@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.prd.quizzoapp.views.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_createRoomFragment"
+            app:destination="@id/createRoomFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createRoomFragment"
+        android:name="com.prd.quizzoapp.views.room.CreateRoomFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_create_room" >
+        <argument android:name="categoriesList"
+            app:argType="java.util.ArrayList"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="idRoom"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.prd.quizzoapp.views.acc.ProfileFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_profile" />
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.prd.quizzoapp.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/roomFragment"
+        android:name="com.prd.quizzoapp.views.room.RoomFragment"
+        android:label="fragment_room"
+        tools:layout="@layout/fragment_room" >
+        <action
+            android:id="@+id/action_roomFragment_to_createRoomFragment"
+            app:destination="@id/createRoomFragment" />
+    </fragment>
+</navigation>
