@@ -24,7 +24,7 @@ public class CategoryViewHolder extends RecyclerView.ViewHolder{
     }
 
 
-    public void bind(Category category, Context context) {
+    public void bind(Category category, Context context, CategoryAdapter.OnClickCategory onClickCategory) {
         binding.category.setText(category.getCategory().getName());
         Picasso.get().load(category.getImg()).into(binding.image);
         binding.cardView.setOnClickListener(v -> {
@@ -37,6 +37,7 @@ public class CategoryViewHolder extends RecyclerView.ViewHolder{
                 binding.category.setTextColor(ContextCompat.getColor(context,R.color.dark_gray_3));
                 category.setSelected(true);
             }
+            onClickCategory.onClickCategory();
         });
     }
 }

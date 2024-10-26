@@ -50,4 +50,28 @@
             android:id="@+id/action_roomFragment_to_createRoomFragment"
             app:destination="@id/createRoomFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/notRoomFragment"
+        android:name="com.prd.quizzoapp.views.room.NotRoomFragment"
+        android:label="fragment_not_room"
+        tools:layout="@layout/fragment_not_room" />
+    <activity
+        android:id="@+id/leaderBoardActivity"
+        android:name="com.prd.quizzoapp.views.quiz.LeaderBoardActivity"
+        android:label="activity_leader_board"
+        tools:layout="@layout/activity_leader_board" />
+    <activity
+        android:id="@+id/quizActivity"
+        android:name="com.prd.quizzoapp.views.quiz.QuizActivity"
+        android:label="activity_quiz"
+        tools:layout="@layout/activity_quiz" />
+    <activity
+        android:id="@+id/registerActivity"
+        android:name="com.prd.quizzoapp.views.acc.RegisterActivity"
+        android:label="activity_register"
+        tools:layout="@layout/activity_register" />
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.prd.quizzoapp.views.acc.LoginActivity"
+        android:label="LoginActivity" />
 </navigation>

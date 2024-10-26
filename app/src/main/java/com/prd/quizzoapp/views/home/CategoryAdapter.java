@@ -17,10 +17,12 @@ import java.util.stream.Collectors;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder>{
     private Context context;
     private ArrayList<Category> categories;
+    private OnClickCategory onClickCategory;
 
-    public CategoryAdapter(ArrayList<Category> categories, Context context) {
+    public CategoryAdapter(ArrayList<Category> categories, Context context, OnClickCategory onClickCategory) {
         this.categories = categories;
         this.context = context;
+        this.onClickCategory = onClickCategory;
     }
 
     @NonNull
@@ -33,7 +35,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
         Category category = categories.get(position);
-        holder.bind(category,context);
+        holder.bind(category,context,onClickCategory);
     }
 
     @Override
@@ -48,4 +50,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryViewHolder>{
     public ArrayList<Category> getSelectedCategories() {
         return  categories.stream().filter(Category::isSelected).collect(Collectors.toCollection(ArrayList::new));
     }
+
+    public interface OnClickCategory {
+        void onClickCategory();
+    }
 }
+
+

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.prd.quizzoapp.MainActivity;
 import com.prd.quizzoapp.databinding.ActivityLoginBinding;
 import com.prd.quizzoapp.model.service.AccountService;
 
@@ -31,7 +32,9 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         binding.tvRegister.setOnClickListener(v -> {
-            Intent intent = new Intent(this, RegisterActivity.class);
+            /*Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent);*/
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
         });

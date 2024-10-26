@@ -123,10 +123,7 @@ public class CreateRoomFragment extends Fragment {
 
         // Listener para la "X" del chip
         chip.setOnCloseIconClickListener((v) -> {
-            // Eliminar el chip del ChipGroup
             binding.chipGroupSubCategories.removeView(chip);
-
-            // Opcional: Eliminar la subcategoría de la lista de datos si es necesario
             selectedSubCategories.remove(selectedSubCategories.stream()
                     .filter(subCategory -> subCategory.getName().equals(name))
                     .findFirst().get());
@@ -142,10 +139,12 @@ public class CreateRoomFragment extends Fragment {
     public void createRoom() {
 
         if(binding.chipGroupQuestions.getCheckedChipIds().isEmpty()){
+            binding.chipGroupQuestions.requestFocus();
             Toast.makeText(getContext(), "Selecciona una pregunta", Toast.LENGTH_SHORT).show();
             return;
         }
         if(binding.chipGroupTime.getCheckedChipIds().isEmpty()){
+            binding.chipGroupTime.requestFocus();
             Toast.makeText(getContext(), "Selecciona un tiempo", Toast.LENGTH_SHORT).show();
             return;
         }

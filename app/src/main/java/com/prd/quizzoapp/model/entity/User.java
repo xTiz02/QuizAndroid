@@ -17,6 +17,9 @@ public class User {
         this.img = img;
     }
 
+
+    public User() {
+    }
     public String getPassword() {
         return password;
     }
@@ -31,9 +34,6 @@ public class User {
 
     public void setImg(String img) {
         this.img = img;
-    }
-
-    public User() {
     }
 
     public String getEmail() {
