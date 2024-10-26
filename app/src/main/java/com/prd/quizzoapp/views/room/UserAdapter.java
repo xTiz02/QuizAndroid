@@ -8,23 +8,23 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.prd.quizzoapp.R;
-import com.prd.quizzoapp.model.entity.User;
+import com.prd.quizzoapp.model.entity.UserRoom;
 
 import java.util.ArrayList;
 
 public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
-    private ArrayList<User> users;
+    private ArrayList<UserRoom> userRooms;
 
-    public UserAdapter(ArrayList<User> users) {
-        this.users = users;
+    public UserAdapter(ArrayList<UserRoom> userRooms) {
+        this.userRooms = userRooms;
     }
 
-    public ArrayList<User> getUsers() {
-        return users;
+    public ArrayList<UserRoom> getUsers() {
+        return userRooms;
     }
 
-    public void setUsers(ArrayList<User> users) {
-        this.users = users;
+    public void setUsers(ArrayList<UserRoom> userRooms) {
+        this.userRooms = userRooms;
     }
 
     @NonNull
@@ -36,24 +36,24 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        User user = users.get(position);
-        holder.bind(user);
+        UserRoom userRoom = userRooms.get(position);
+        holder.bind(userRoom);
     }
 
     @Override
     public int getItemCount() {
-        return users.size();
+        return userRooms.size();
     }
 
-    public void addUser(User user) {
-        users.add(user);
-        notifyItemInserted(users.size() - 1);
+    public void addUser(UserRoom userRoom) {
+        userRooms.add(userRoom);
+        notifyItemInserted(userRooms.size() - 1);
     }
 
     public void removeUser(String uuid) {
-        User user = users.stream().filter(u -> u.getUUID().equals(uuid)).findFirst().orElse(null);
-        int index = users.indexOf(user);
-        users.remove(user);
+        UserRoom userRoom = userRooms.stream().filter(u -> u.getUUID().equals(uuid)).findFirst().orElse(null);
+        int index = userRooms.indexOf(userRoom);
+        userRooms.remove(userRoom);
         notifyItemRemoved(index);
     }
 }

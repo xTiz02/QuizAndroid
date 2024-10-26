@@ -5,7 +5,7 @@ import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Question;
 import com.prd.quizzoapp.model.entity.QuestionOption;
 import com.prd.quizzoapp.model.entity.SubCategory;
-import com.prd.quizzoapp.model.entity.User;
+import com.prd.quizzoapp.model.entity.UserRoom;
 import com.prd.quizzoapp.model.entity.UserResult;
 
 import java.util.ArrayList;
@@ -50,14 +50,14 @@ public class Data {
                 new SubCategory("Calculo", CategoryEnum.MATEMATICAS)));
     }
 
-    public static ArrayList<User> getUsers() {
+    public static ArrayList<UserRoom> getUsers() {
         return new ArrayList<>(List.of(
-                new User("1", "user1", "Hola! Me gusta este juego 😒 Hola! me gusta este juego", R.drawable.profile_pic,true),
-                new User("2", "user2", "Hola! Me gusta este juego", R.drawable.profile_pic,false),
-                new User("3", "user3", "Hola! Me gusta este juego", R.drawable.profile_pic,false),
-                new User("4", "user4", "Hola! Me gusta este juego", R.drawable.profile_pic,false),
-                new User("5", "user5", "Hola! Me gusta este juego", R.drawable.profile_pic,false),
-                new User("6", "user6", "Hola! Me gusta este juego", R.drawable.profile_pic,false)));
+                new UserRoom("1", "user1", "Hola! Me gusta este juego 😒 Hola! me gusta este juego", Util.default_img,true),
+                new UserRoom("2", "user2", "Hola! Me gusta este juego", Util.default_img,false),
+                new UserRoom("3", "user3", "Hola! Me gusta este juego", Util.default_img,false),
+                new UserRoom("4", "user4", "Hola! Me gusta este juego", Util.default_img,false),
+                new UserRoom("5", "user5", "Hola! Me gusta este juego", Util.default_img,false),
+                new UserRoom("6", "user6", "Hola! Me gusta este juego", Util.default_img,false)));
     }
 
     public static ArrayList<Question> getQuestions(){

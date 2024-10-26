@@ -225,21 +225,21 @@ usersRef.addChildEventListener(new ChildEventListener() {
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
         // Se llama cuando se añade un nuevo usuario
-        User newUser = dataSnapshot.getValue(User.class);
+        UserRoom newUser = dataSnapshot.getValue(UserRoom.class);
         Log.d("Firebase", "Nuevo usuario añadido: " + newUser.getName());
     }
 
     @Override
     public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
         // Se llama cuando cambia un atributo de un usuario
-        User updatedUser = dataSnapshot.getValue(User.class);
+        UserRoom updatedUser = dataSnapshot.getValue(UserRoom.class);
         Log.d("Firebase", "Usuario actualizado: " + updatedUser.getName() + " está listo: " + updatedUser.isReadyToPlay());
     }
 
     @Override
     public void onChildRemoved(DataSnapshot dataSnapshot) {
         // Se llama cuando un usuario es eliminado
-        User removedUser = dataSnapshot.getValue(User.class);
+        UserRoom removedUser = dataSnapshot.getValue(UserRoom.class);
         Log.d("Firebase", "Usuario eliminado: " + removedUser.getName());
     }
 
