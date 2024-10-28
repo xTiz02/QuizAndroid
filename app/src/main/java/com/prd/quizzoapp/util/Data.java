@@ -52,12 +52,12 @@ public class Data {
 
     public static ArrayList<UserRoom> getUsers() {
         return new ArrayList<>(List.of(
-                new UserRoom("1", "user1", "Hola! Me gusta este juego 😒 Hola! me gusta este juego", Util.default_img,true),
-                new UserRoom("2", "user2", "Hola! Me gusta este juego", Util.default_img,false),
-                new UserRoom("3", "user3", "Hola! Me gusta este juego", Util.default_img,false),
-                new UserRoom("4", "user4", "Hola! Me gusta este juego", Util.default_img,false),
-                new UserRoom("5", "user5", "Hola! Me gusta este juego", Util.default_img,false),
-                new UserRoom("6", "user6", "Hola! Me gusta este juego", Util.default_img,false)));
+                new UserRoom("1", "user1", "Hola! Me gusta este juego 😒 Hola! me gusta este juego", Util.default_img,false,true),
+                new UserRoom("2", "user2", "Hola! Me gusta este juego", Util.default_img,false,false),
+                new UserRoom("3", "user3", "Hola! Me gusta este juego", Util.default_img,false,false),
+                new UserRoom("4", "user4", "Hola! Me gusta este juego", Util.default_img,false,false),
+                new UserRoom("5", "user5", "Hola! Me gusta este juego", Util.default_img,false,false),
+                new UserRoom("6", "user6", "Hola! Me gusta este juego", Util.default_img,false,false)));
     }
 
     public static ArrayList<Question> getQuestions(){
@@ -84,7 +84,7 @@ public class Data {
 
     }
 
-    public SubCategory getSubCategoryByName(String name) {
+    public static SubCategory getSubCategoryByName(String name) {
         for (SubCategory subCategory : getSubCategories()) {
             if (subCategory.getName().equals(name)) {
                 return subCategory;

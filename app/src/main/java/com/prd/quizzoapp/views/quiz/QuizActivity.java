@@ -197,6 +197,9 @@ public class QuizActivity extends AppCompatActivity {
 
 
 /*
+
+//Actualizar un dato
+mDatabase.child("users").child(userId).child("username").setValue(name);
 * // Referencia al nodo de usuarios en una sala específica
 DatabaseReference userRef = database.getReference("rooms").child("idSala").child("users").child("user1");
 

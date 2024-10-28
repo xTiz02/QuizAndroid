@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        //hideSystemUI();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initNavigation();
@@ -45,8 +46,10 @@ public class MainActivity extends AppCompatActivity {
         //Si no hay una sala creada, se muestra el fragmento NotRoomFragment en lugar de RoomFragment
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             if(item.getItemId() == R.id.roomFragment) {
-                if(DataSharedPreference.getData(Util.ROOM_UUID, this) == null) {
+                if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) == null) {
                     navController.navigate(R.id.notRoomFragment);
+                }else {
+                    navController.navigate(item.getItemId());
                 }
             }else{
                 navController.navigate(item.getItemId());
@@ -62,5 +65,17 @@ public class MainActivity extends AppCompatActivity {
                 bottomNavigationView.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    private void hideSystemUI() {
+        // Ocultar la barra de navegación y poner la pantalla en modo inmersivo
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_IMMERSIVE
+                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
+
+        );
     }
 }

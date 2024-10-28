@@ -23,6 +23,11 @@ public class UserViewHolder extends RecyclerView.ViewHolder{
         binding.tvUsername.setText(userRoom.getUsername());
         Picasso.get().load(userRoom.getImg()).into(binding.ivPictureProfile);
         binding.tvDescription.setText(userRoom.getDescription());
-        binding.statusCircle.setBackgroundResource(userRoom.isAdmin() ? R.drawable.green_cricle : R.drawable.default_circle);
+        if(userRoom.isPlaying()){
+            binding.statusCircle.setBackgroundResource(R.drawable.button_1);
+        }else{
+            binding.statusCircle.setBackgroundResource(userRoom.isAdmin() ? R.drawable.green_cricle : R.drawable.default_circle);
+        }
+
     }
 }

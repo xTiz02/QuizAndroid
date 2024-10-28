@@ -5,11 +5,13 @@ public class UserRoom {
     private String username;
     private String description;
     private String img;
+    private boolean isPlaying;
     private boolean isAdmin;
 
-    public UserRoom(String uuid, String username, String description, String img, boolean isAdmin) {
+    public UserRoom(String uuid, String username, String description, String img,boolean isPlaying, boolean isAdmin) {
         UUID = uuid;
         this.username = username;
+        this.isPlaying = isPlaying;
         this.description = description;
         this.img = img;
         this.isAdmin = isAdmin;
@@ -19,7 +21,13 @@ public class UserRoom {
     public UserRoom() {
     }
 
+    public boolean isPlaying() {
+        return isPlaying;
+    }
 
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
 
     public String getUUID() {
         return UUID;
@@ -69,6 +77,7 @@ public class UserRoom {
                 ", description='" + description + '\'' +
                 ", img=" + img +
                 ", isAdmin=" + isAdmin +
+                ", isPlaying=" + isPlaying +
                 '}';
     }
 }

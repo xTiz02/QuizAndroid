@@ -76,10 +76,7 @@ public class RoomFragment extends Fragment {
         binding.roomConfig.setOnClickListener(v -> {
             //Cargar CreateRoomFragment en el contenedor del main activity
             NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
-            RoomFragmentDirections.ActionRoomFragmentToCreateRoomFragment action =
-                    RoomFragmentDirections.actionRoomFragmentToCreateRoomFragment();
-            action.setIdRoom("1234");
-            navController.navigate(action);
+            navController.navigate(R.id.action_roomFragment_to_createRoomFragment);
         });
 
     }
