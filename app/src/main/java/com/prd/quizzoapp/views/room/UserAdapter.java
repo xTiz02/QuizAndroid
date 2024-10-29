@@ -46,8 +46,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
     }
 
     public void addUser(UserRoom userRoom) {
-        userRooms.add(userRoom);
-        notifyItemInserted(userRooms.size() - 1);
+        userRooms.add(0,userRoom);
+        //poner al usurio en la ultima posicion
+        //notifyItemInserted(userRooms.size() - 1);
+        //poner al usuario en la primera posicion de la lista
+        notifyItemInserted(0);
     }
 
     public void removeUser(String uuid) {
@@ -55,5 +58,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         int index = userRooms.indexOf(userRoom);
         userRooms.remove(userRoom);
         notifyItemRemoved(index);
+    }
+
+    public void updateUser(UserRoom userRoom) {
+        UserRoom oldUserRoom = userRooms.stream().filter(u -> u.getUUID().equals(userRoom.getUUID())).findFirst().orElse(null);
+        int index = userRooms.indexOf(oldUserRoom);
+        userRooms.set(index, userRoom);
+        notifyItemChanged(index);
     }
 }

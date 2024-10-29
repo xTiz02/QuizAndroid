@@ -103,13 +103,13 @@ public class CreateRoomFragment extends Fragment {
             binding.btnCreateRoom.setText("Actualizar sala");
             roomService.getRoomByUuid(idRoom, new DataActionCallback<Room>() {
                 @Override
-                public void onSuccess(Room room) {
-                    currentRoom = room;
-                    code = room.getCode();
+                public void onSuccess(Room data) {
+                    currentRoom = data;
+                    code = data.getRoomConfig().getCode();
                     binding.tvCode.setText(code);
-                    selectedCategories = room.getCategories();
-                    if(room.getSubCategories() != null){
-                        selectedSubCategories = room.getSubCategories().stream()
+                    selectedCategories = data.getCategories();
+                    if(data.getSubCategories() != null){
+                        selectedSubCategories = data.getSubCategories().stream()
                                 .map(Data::getSubCategoryByName)
                                 .collect(Collectors.toCollection(ArrayList::new));
                     }else {
@@ -122,7 +122,7 @@ public class CreateRoomFragment extends Fragment {
 
                     for (int i = 0; i < binding.chipGroupQuestions.getChildCount(); i++) {
                         Chip chip = (Chip) binding.chipGroupQuestions.getChildAt(i);
-                        if (chip.getText().toString().equals(String.valueOf(room.getQuestions()))) {
+                        if (chip.getText().toString().equals(String.valueOf(data.getRoomConfig().getQuestions()))) {
                             chip.setChecked(true);
                             break;
                         }
@@ -130,13 +130,12 @@ public class CreateRoomFragment extends Fragment {
 
                     for (int i = 0; i < binding.chipGroupTime.getChildCount(); i++) {
                         Chip chip = (Chip) binding.chipGroupTime.getChildAt(i);
-                        if (chip.getText().toString().equals(String.valueOf(room.getTimeOfQuestion()))){
+                        if (chip.getText().toString().equals(String.valueOf(data.getRoomConfig().getTimeOfQuestion()))){
                             chip.setChecked(true);
                             break;
                         }
                     }
                     ls.hideLoading();
-
                 }
                 @Override
                 public void onFailure(Exception e) {
@@ -282,15 +281,15 @@ public class CreateRoomFragment extends Fragment {
 
         Chip selectedChip = binding.chipGroupQuestions.findViewById(binding.chipGroupQuestions.getCheckedChipId());
         Chip selectedChipTime = binding.chipGroupTime.findViewById(binding.chipGroupTime.getCheckedChipId());
-        if(currentRoom.getQuestions() != Integer.parseInt(selectedChip.getText().toString())){
+        if(currentRoom.getRoomConfig().getQuestions() != Integer.parseInt(selectedChip.getText().toString())){
             newRoom.put("questions", Integer.parseInt(selectedChip.getText().toString()));
         }
-        if(currentRoom.getTimeOfQuestion() != Integer.parseInt(selectedChipTime.getText().toString())){
+        if(currentRoom.getRoomConfig().getTimeOfQuestion() != Integer.parseInt(selectedChipTime.getText().toString())){
             newRoom.put("timeOfQuestion", Integer.parseInt(selectedChipTime.getText().toString()));
 
         }
 
-        if(!code.equals(currentRoom.getCode())){
+        if(!code.equals(currentRoom.getRoomConfig().getCode())){
             newRoom.put("code", code);
         }
         if(newRoom.isEmpty()){

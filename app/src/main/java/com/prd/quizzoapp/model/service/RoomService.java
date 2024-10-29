@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Room;
+import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.entity.User;
 import com.prd.quizzoapp.model.entity.UserRoom;
 import com.prd.quizzoapp.util.DataSharedPreference;
@@ -37,17 +38,16 @@ public class RoomService {
         String roomUUID = dbRef.push().getKey();
         us.getUser(auth.getCurrentUser().getUid(), new DataActionCallback<User>() {
             @Override
-            public void onSuccess(User user) {
-                Room room = new Room(roomUUID,
-                        subCategories,time,categories,
-                        auth.getCurrentUser().getUid(),questions,roomCode);
-                dbRef.child(roomUUID).setValue(room).addOnCompleteListener(task -> {
+            public void onSuccess(User data) {
+                Room room = new Room(new RoomConfig(roomUUID,auth.getCurrentUser().getUid(),time,questions,roomCode),
+                        subCategories,categories);
+                dbRef.child(roomUUID).child("settings").setValue(room).addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
-                        UserRoom userRoom = new UserRoom(user.getUUID(),user.getUsername(),user.getDescription(),user.getImg(),false,true);
+                        UserRoom userRoom = new UserRoom(data.getUUID(), data.getUsername(), data.getDescription(), data.getImg(),false,true);
                         us.saveUserRoom(roomUUID, userRoom, new ActionCallback() {
                             @Override
                             public void onSuccess() {
-                                DataSharedPreference.saveData(Util.ROOM_UUID_KEY, room.getUuid(), context);
+                                DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomUUID, context);
                                 callback.onSuccess();
                             }
                             @Override
@@ -72,7 +72,7 @@ public class RoomService {
     }
 
     public void getRoomByUuid(String roomUUID, DataActionCallback<Room> callback){
-        dbRef.child(roomUUID).get().addOnCompleteListener(task -> {
+        dbRef.child(roomUUID).child("settings").get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 Room room = task.getResult().getValue(Room.class);
                 Log.d(TAG, "Room: "+room);
@@ -85,7 +85,7 @@ public class RoomService {
     }
 
     public void updateRoom(String roomUuid,Map<String,Object> data, ActionCallback callback){
-        dbRef.child(roomUuid).updateChildren(data).addOnCompleteListener(task -> {
+        dbRef.child(roomUuid).child("settings").updateChildren(data).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 callback.onSuccess();
             }else {

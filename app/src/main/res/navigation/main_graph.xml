@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_homeFragment_to_createRoomFragment"
             app:destination="@id/createRoomFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_roomFragment"
+            app:destination="@id/roomFragment" />
     </fragment>
 
     <fragment

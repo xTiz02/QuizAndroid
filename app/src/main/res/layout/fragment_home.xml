@@ -121,13 +121,13 @@
         android:paddingStart="15dp"
         android:text="Crear sala"
         style="@style/Button_principal"
-        app:layout_constraintEnd_toStartOf="@+id/textView12"
+        app:layout_constraintEnd_toStartOf="@+id/btnFindRoom"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view3" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/textView12"
+        android:id="@+id/btnFindRoom"
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginStart="8dp"

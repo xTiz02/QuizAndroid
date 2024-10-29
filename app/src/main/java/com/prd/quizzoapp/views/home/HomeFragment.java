@@ -1,11 +1,14 @@
 package com.prd.quizzoapp.views.home;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -16,7 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentHomeBinding;
+import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.util.Data;
+import com.prd.quizzoapp.util.DataSharedPreference;
+import com.prd.quizzoapp.util.Util;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +31,7 @@ public class HomeFragment extends Fragment {
 
     private CategoryAdapter categoryAdapter;
     private FragmentHomeBinding binding;
+    private LoadingService ls;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -46,7 +53,10 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentHomeBinding.bind(view);
-        categoryAdapter = new CategoryAdapter(Data.getCategories(),requireContext(),checkButtonRoom());
+        ls = new LoadingService(requireContext());
+        categoryAdapter = new CategoryAdapter(Data.getCategories(),
+                requireContext(),
+                DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext())!=null? () -> {}:checkButtonRoom());
         binding.rvCcategory.setHasFixedSize(true);
         binding.rvCcategory.setLayoutManager(new GridLayoutManager(requireContext(),2));
         binding.rvCcategory.setAdapter(categoryAdapter);
@@ -54,6 +64,12 @@ public class HomeFragment extends Fragment {
         binding.btnCreateRoom.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.button_disabled));
         binding.btnCreateRoom.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.dark_gray_1)));
         binding.btnCreateRoom.setEnabled(false);
+
+        if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext())!=null) {
+            binding.btnFindRoom.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.button_disabled));
+            binding.btnFindRoom.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.dark_gray_1)));
+            binding.btnFindRoom.setEnabled(false);
+        }
 
         binding.btnCreateRoom.setOnClickListener(v -> {
             //Cargar CreateRoomFragment en el contenedor del main activity
@@ -69,22 +85,51 @@ public class HomeFragment extends Fragment {
 
         });
 
+        binding.btnFindRoom.setOnClickListener(v -> {
+            //mostrar dialog
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setContentView(R.layout.find_room_dialog);
+            dialog.setCancelable(true);
+            dialog.show();
+
+            Button btnFind = dialog.findViewById(R.id.btnFind);
+            EditText etRoomId = dialog.findViewById(R.id.edtCode);
+            btnFind.setOnClickListener(v1 -> {
+
+                String edtCode = etRoomId.getText().toString();
+                if(edtCode.isEmpty()){
+                    etRoomId.setError("Ingrese un código");
+                    return;
+                }
+                ls.showLoading("Buscando sala...");
+                //Metodo para buscar la sala
+
+
+                dialog.dismiss();
+                //Cargar FindRoomFragment en el contenedor del main activity
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                navController.navigate(R.id.action_homeFragment_to_roomFragment);
+                ls.hideLoading();
+
+            });
+        });
 
     }
 
     public CategoryAdapter.OnClickCategory checkButtonRoom(){
         return () -> {
-            if (!categoryAdapter.getSelectedCategories().isEmpty()){
+            if (!categoryAdapter.getSelectedCategories().isEmpty()) {
                 binding.btnCreateRoom.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.button_back));
                 binding.btnCreateRoom.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.dark_gray_3)));
-               binding.btnCreateRoom.setEnabled(true);
+                binding.btnCreateRoom.setEnabled(true);
                 System.out.println("Habilitado");
-            }else {
+            } else {
                 binding.btnCreateRoom.setBackgroundDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.button_disabled));
                 binding.btnCreateRoom.setCompoundDrawableTintList(ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.dark_gray_1)));
                 binding.btnCreateRoom.setEnabled(false);
                 System.out.println("Deshabilitado");
             }
+
         };
     }
 
