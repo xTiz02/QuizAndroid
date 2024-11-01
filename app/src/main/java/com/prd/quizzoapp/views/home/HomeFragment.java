@@ -19,7 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentHomeBinding;
+import com.prd.quizzoapp.model.entity.RoomConfig;
+import com.prd.quizzoapp.model.service.DataActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
+import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.util.Data;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
@@ -32,6 +35,7 @@ public class HomeFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private FragmentHomeBinding binding;
     private LoadingService ls;
+    private RoomService rs;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -54,6 +58,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentHomeBinding.bind(view);
         ls = new LoadingService(requireContext());
+        rs = new RoomService(requireContext());
         categoryAdapter = new CategoryAdapter(Data.getCategories(),
                 requireContext(),
                 DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext())!=null? () -> {}:checkButtonRoom());
@@ -96,20 +101,35 @@ public class HomeFragment extends Fragment {
             EditText etRoomId = dialog.findViewById(R.id.edtCode);
             btnFind.setOnClickListener(v1 -> {
 
-                String edtCode = etRoomId.getText().toString();
+                String edtCode = etRoomId.getText().toString().trim();
                 if(edtCode.isEmpty()){
                     etRoomId.setError("Ingrese un código");
                     return;
                 }
                 ls.showLoading("Buscando sala...");
-                //Metodo para buscar la sala
+                rs.findAndJoinRoom(
+                        edtCode,
+                        new DataActionCallback<RoomConfig>() {
+                            @Override
+                            public void onSuccess(RoomConfig data) {
+                                System.out.println("RoomConfig: "+data);
+                                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                                navController.navigate(R.id.roomFragment);
+                                dialog.dismiss();
+                                ls.hideLoading();
+                            }
 
-
-                dialog.dismiss();
+                            @Override
+                            public void onFailure(Exception e) {
+                                Util.showToastLog("No se encontro la sala",requireContext());
+                                ls.hideLoading();
+                            }
+                        }
+                );
                 //Cargar FindRoomFragment en el contenedor del main activity
-                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                /*NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
                 navController.navigate(R.id.action_homeFragment_to_roomFragment);
-                ls.hideLoading();
+                ls.hideLoading();*/
 
             });
         });

@@ -18,4 +18,11 @@ public class DataSharedPreference {
         SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString(key, null);
     }
+
+    public static void removeData(String key, Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(key);
+        editor.apply();
+    }
 }

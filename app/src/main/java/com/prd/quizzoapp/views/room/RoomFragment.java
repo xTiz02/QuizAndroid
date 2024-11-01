@@ -25,7 +25,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentRoomBinding;
+import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.entity.UserRoom;
+import com.prd.quizzoapp.model.service.ActionCallback;
 import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.util.Data;
 import com.prd.quizzoapp.util.DataSharedPreference;
@@ -43,6 +45,7 @@ public class RoomFragment extends Fragment {
     private FragmentRoomBinding binding;
     private RoomService rS;
     private String idRoom;
+    private boolean isAdmin = false;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
 
@@ -94,9 +97,25 @@ public class RoomFragment extends Fragment {
         });
 
         binding.roomConfig.setOnClickListener(v -> {
-            //Cargar CreateRoomFragment en el contenedor del main activity
             NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
             navController.navigate(R.id.action_roomFragment_to_createRoomFragment);
+        });
+
+        binding.btnLeaveRoom.setOnClickListener(v -> {
+            rS.deleteRoom(idRoom, auth.getUid().toString(), isAdmin, new ActionCallback() {
+                @Override
+                public void onSuccess() {
+                    if(!isAdmin){
+                        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                        navController.navigate(R.id.homeFragment);
+                    }
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Toast.makeText(getContext(), "Error al dejar la sala", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         //obtener la lista de usuarios de la sala
@@ -124,7 +143,21 @@ public class RoomFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     System.out.println("Se obtuvo la conf de la sala: " + snapshot.getValue());
-                    binding.tvCode.setText(snapshot.child("roomConfig").child("code").getValue().toString());
+                    RoomConfig roomConfig = snapshot.child("roomConfig").getValue(RoomConfig.class);
+                    binding.tvCode.setText(roomConfig.getCode());
+                    if(auth.getUid().toString().equals(roomConfig.getUuidAdmin())){
+                        isAdmin = true;
+                        binding.btnStartGame.setVisibility(View.VISIBLE);
+                        binding.btnLeaveRoom.setVisibility(View.VISIBLE);
+                        binding.roomConfig.setVisibility(View.VISIBLE);
+                    }else{
+                        isAdmin = false;
+                        binding.btnLeaveRoom.setVisibility(View.VISIBLE);
+                    }
+                }else {
+                    DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
+                    NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                    navController.navigate(R.id.homeFragment);
                 }
             }
 
@@ -169,4 +202,6 @@ public class RoomFragment extends Fragment {
         });
 
     }
+
+
 }

@@ -46,16 +46,24 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
     }
 
     public void addUser(UserRoom userRoom) {
-        userRooms.add(0,userRoom);
-        //poner al usurio en la ultima posicion
-        //notifyItemInserted(userRooms.size() - 1);
-        //poner al usuario en la primera posicion de la lista
-        notifyItemInserted(0);
+        if (userRoom.isAdmin()) {
+            userRooms.add(0, userRoom);
+            notifyItemInserted(0);
+
+            for (int i = 1; i < userRooms.size(); i++) {
+                notifyItemChanged(i);
+            }
+        } else {
+            userRooms.add(userRoom);
+            notifyItemInserted(userRooms.size());
+        }
     }
 
     public void removeUser(String uuid) {
         UserRoom userRoom = userRooms.stream().filter(u -> u.getUUID().equals(uuid)).findFirst().orElse(null);
         int index = userRooms.indexOf(userRoom);
+        System.out.println("Index: " + index);
+        System.out.println("Users:" + userRooms);
         userRooms.remove(userRoom);
         notifyItemRemoved(index);
     }
@@ -65,5 +73,33 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
         int index = userRooms.indexOf(oldUserRoom);
         userRooms.set(index, userRoom);
         notifyItemChanged(index);
+
+        /*
+        *   UserRoom oldUserRoom = userRooms.stream()
+            .filter(u -> u.getUUID().equals(userRoom.getUUID()))
+            .findFirst()
+            .orElse(null);
+
+    if (oldUserRoom != null) { // Verificar si el usuario existe
+        int index = userRooms.indexOf(oldUserRoom);
+
+        if (userRoom.isAdmin()) { // Si el usuario actualizado ahora es administrador
+            // Eliminar el usuario de su posición actual
+            userRooms.remove(index);
+            notifyItemRemoved(index);
+
+            // Insertarlo en la posición 0
+            userRooms.add(0, userRoom);
+            notifyItemInserted(0);
+
+            // Notificar cambios en el resto de las posiciones
+            for (int i = 1; i < userRooms.size(); i++) {
+                notifyItemChanged(i);
+            }
+        } else { // Si no es administrador
+            userRooms.set(index, userRoom);
+            notifyItemChanged(index);
+        }
+    }*/
     }
 }

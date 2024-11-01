@@ -46,14 +46,26 @@ public class UserService {
         });
     }
 
-    public void saveUserRoom(String roomUuid, UserRoom userRoom, ActionCallback callback){
+    public void saveUserRoom(String roomUuid, String userUuid,boolean isAdmin, ActionCallback callback){
         DatabaseReference reference = database.getReference("rooms").child(roomUuid).child("usersRoom");
-        reference.child(userRoom.getUUID()).setValue(userRoom).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                callback.onSuccess();
-            }else {
-                Util.showLog(TAG,"Error al guardar usuario en sala");
-                callback.onFailure(task.getException());
+        getUser(userUuid, new DataActionCallback<User>() {
+            @Override
+            public void onSuccess(User data) {
+                UserRoom userRoom = new UserRoom(data.getUUID(), data.getUsername(), data.getDescription(), data.getImg(), false, isAdmin);
+                reference.child(userRoom.getUUID()).setValue(userRoom).addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        callback.onSuccess();
+                    }else {
+                        Util.showLog(TAG, "Error al guardar usuario en sala");
+                        callback.onFailure(task.getException());
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Util.showLog(TAG, "Error al obtener usuario");
+                callback.onFailure(e);
             }
         });
     }

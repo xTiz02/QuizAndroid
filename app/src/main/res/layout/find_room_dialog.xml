@@ -1,67 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="32dp"
-    app:cardCornerRadius="32dp"
-    app:cardElevation="8dp">
-
-    <LinearLayout
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray">
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ingresar a una sala"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginBottom="16dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ingresar clave"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="8dp"/>
-
-        <EditText
-            android:id="@+id/edtCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:hint="-"
-            android:textSize="16sp"
-            android:layout_marginBottom="24dp"/>
-
-
+        android:layout_margin="40dp"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:orientation="vertical"
+            android:padding="24dp">
 
-
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnFind"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Buscar"
-                style="@style/Button_principal"
+                android:text="Ingresar a una sala"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ingresar clave"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/edtCode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:clickable="true"
-                android:focusable="true"/>
+                android:hint="-"
+                android:textSize="16sp"
+                android:layout_marginBottom="24dp"/>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnFind"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Buscar"
+                    style="@style/Button_principal"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.cardview.widget.CardView>

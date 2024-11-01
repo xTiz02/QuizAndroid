@@ -3,14 +3,18 @@ package com.prd.quizzoapp.model.service;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.RoomConfig;
-import com.prd.quizzoapp.model.entity.User;
-import com.prd.quizzoapp.model.entity.UserRoom;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 
@@ -36,38 +40,28 @@ public class RoomService {
     public void createRoom(String roomCode,  int questions, int time,
                            ArrayList<Category> categories, ArrayList<String> subCategories, ActionCallback callback) {
         String roomUUID = dbRef.push().getKey();
-        us.getUser(auth.getCurrentUser().getUid(), new DataActionCallback<User>() {
-            @Override
-            public void onSuccess(User data) {
-                Room room = new Room(new RoomConfig(roomUUID,auth.getCurrentUser().getUid(),time,questions,roomCode),
-                        subCategories,categories);
-                dbRef.child(roomUUID).child("settings").setValue(room).addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        UserRoom userRoom = new UserRoom(data.getUUID(), data.getUsername(), data.getDescription(), data.getImg(),false,true);
-                        us.saveUserRoom(roomUUID, userRoom, new ActionCallback() {
-                            @Override
-                            public void onSuccess() {
-                                DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomUUID, context);
-                                callback.onSuccess();
-                            }
-                            @Override
-                            public void onFailure(Exception e) {
-                                Util.showLog(TAG, "Error al guardar usuario en sala");
-                                callback.onFailure(e);
-                            }
-                        });
-                    }else {
-                        Util.showLog(TAG, "Error al guardar sala");
-                        callback.onFailure(task.getException());
+        String userUUID = auth.getUid().toString();
+        Room room = new Room(new RoomConfig(roomUUID,userUUID,time,questions,roomCode),subCategories,categories);
+        dbRef.child(roomUUID).child("settings").setValue(room).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                us.saveUserRoom(roomUUID, userUUID, true, new ActionCallback() {
+                    @Override
+                    public void onSuccess() {
+                        DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomUUID, context);
+                        callback.onSuccess();
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        Util.showLog(TAG, "Error al guardar usuario en sala");
+                        callback.onFailure(e);
                     }
                 });
-            }
-            @Override
-            public void onFailure(Exception e) {
-                Util.showLog(TAG,"Error al obtener usuario que crea la sala");
-                callback.onFailure(e);
+            }else {
+                Util.showLog(TAG, "Error al guardar sala");
+                callback.onFailure(task.getException());
             }
         });
+
 
     }
 
@@ -85,7 +79,7 @@ public class RoomService {
     }
 
     public void updateRoom(String roomUuid,Map<String,Object> data, ActionCallback callback){
-        dbRef.child(roomUuid).child("settings").updateChildren(data).addOnCompleteListener(task -> {
+        dbRef.child(roomUuid).child("settings/roomConfig").updateChildren(data).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 callback.onSuccess();
             }else {
@@ -93,5 +87,63 @@ public class RoomService {
                 callback.onFailure(task.getException());
             }
         });
+    }
+
+
+    public void findAndJoinRoom(String roomCode, DataActionCallback<RoomConfig> callback){
+        System.out.println("Code to find: "+roomCode);
+        Query query = dbRef.orderByChild("settings/roomConfig/code").equalTo(roomCode);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    for(DataSnapshot ds: snapshot.getChildren()){
+                        RoomConfig roomConfig = ds.child("settings/roomConfig").getValue(RoomConfig.class);
+                        DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomConfig.getUuid(), context);
+                        us.saveUserRoom(roomConfig.getUuid(), auth.getUid(), false, new ActionCallback() {
+                            @Override
+                            public void onSuccess() {
+                                callback.onSuccess(roomConfig);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                callback.onFailure(e);
+                            }
+                        });
+                        break;
+                    }
+                }else {
+                    callback.onFailure(new Exception("No se encontró la sala"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onFailure(new Exception("Error al buscar sala"));
+            }
+        });
+    }
+
+
+    public void deleteRoom(String roomUUID,String userUuid, boolean isAdmin, ActionCallback callback){
+        if(isAdmin){
+            dbRef.child(roomUUID).removeValue().addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    callback.onSuccess();
+                }else {
+                    callback.onFailure(task.getException());
+                }
+            });
+        }else {
+            dbRef.child(roomUUID).child("usersRoom").child(userUuid).removeValue().addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
+                    callback.onSuccess();
+                }else {
+                    callback.onFailure(task.getException());
+                }
+            });
+        }
     }
 }

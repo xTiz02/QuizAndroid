@@ -298,7 +298,7 @@ public class CreateRoomFragment extends Fragment {
             return;
         }
         System.out.println(newRoom);
-        /*roomService.updateRoom(
+        roomService.updateRoom(
                 idRoom,
                 newRoom,
                 new ActionCallback() {
@@ -317,6 +317,6 @@ public class CreateRoomFragment extends Fragment {
                         ls.hideLoading();
                         Util.showToastLog("Error al actualizar sala", getContext());
                     }
-                });*/
+                });
     }
 }
