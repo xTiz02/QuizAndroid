@@ -2,12 +2,17 @@ package com.prd.quizzoapp.model.entity;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 import java.util.List;
 
 public class Question implements Serializable {
+    @Expose
     private String uuid;
+    @Expose
     private String question;
+    @Expose
     private List<QuestionOption> options;
 
     public Question() {

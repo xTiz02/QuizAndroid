@@ -102,6 +102,9 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void setQuestion() {
+        if(currentQuestion.getQuestion().length()>40){
+            binding.tvQuestion.setTextSize(20);
+        }
         binding.tvQuestion.setText(currentQuestion.getQuestion());
     }
 
@@ -138,6 +141,9 @@ public class QuizActivity extends AppCompatActivity {
 
     private void addOptionButton(QuestionOption option) {
         AppCompatButton button = new AppCompatButton(this);
+        if(option.getOption().length()>25){
+            button.setTextSize(15);
+        }
         button.setText(option.getOption());
         button.setTag(option.isCorrect());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(

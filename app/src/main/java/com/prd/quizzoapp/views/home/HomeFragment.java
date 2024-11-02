@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentHomeBinding;
 import com.prd.quizzoapp.model.entity.RoomConfig;
-import com.prd.quizzoapp.model.service.DataActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.util.Data;

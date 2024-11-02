@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.prd.quizzoapp.databinding.ActivityRegisterBinding;
 import com.prd.quizzoapp.model.service.AccountService;
-import com.prd.quizzoapp.model.service.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.util.Util;
 

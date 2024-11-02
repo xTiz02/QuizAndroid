@@ -20,8 +20,8 @@ import com.prd.quizzoapp.databinding.FragmentCreateRoomBinding;
 import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.SubCategory;
-import com.prd.quizzoapp.model.service.ActionCallback;
-import com.prd.quizzoapp.model.service.DataActionCallback;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.util.CategoryEnum;
@@ -272,32 +272,32 @@ public class CreateRoomFragment extends Fragment {
         Map<String, Object> newRoom = new HashMap<>();
         Set<String> subCategoriesSet = selectedSubCategories.stream()
                 .map(SubCategory::getName).collect(Collectors.toSet());
-        Set<String> currentSubCategoriesSet = new HashSet<>(currentRoom.getSubCategories());
         //ver si las categorias seleccionadas son las mismas que las actuales
 
-        if(!subCategoriesSet.equals(currentSubCategoriesSet)){
-            newRoom.put("subCategories", subCategoriesSet);
+        if(!subCategoriesSet.equals(new HashSet<>(currentRoom.getSubCategories()))){
+            newRoom.put("subCategories", selectedSubCategories.stream()
+                    .map(SubCategory::getName)
+                    .collect(Collectors.toCollection(ArrayList::new)));
         }
 
         Chip selectedChip = binding.chipGroupQuestions.findViewById(binding.chipGroupQuestions.getCheckedChipId());
         Chip selectedChipTime = binding.chipGroupTime.findViewById(binding.chipGroupTime.getCheckedChipId());
-        if(currentRoom.getRoomConfig().getQuestions() != Integer.parseInt(selectedChip.getText().toString())){
-            newRoom.put("questions", Integer.parseInt(selectedChip.getText().toString()));
-        }
-        if(currentRoom.getRoomConfig().getTimeOfQuestion() != Integer.parseInt(selectedChipTime.getText().toString())){
-            newRoom.put("timeOfQuestion", Integer.parseInt(selectedChipTime.getText().toString()));
 
+        if(currentRoom.getRoomConfig().getQuestions() != Integer.parseInt(selectedChip.getText().toString())) {
+            newRoom.put("/roomConfig/questions", Integer.parseInt(selectedChip.getText().toString()));
         }
-
-        if(!code.equals(currentRoom.getRoomConfig().getCode())){
-            newRoom.put("code", code);
+        if(currentRoom.getRoomConfig().getTimeOfQuestion() != Integer.parseInt(selectedChipTime.getText().toString())) {
+            newRoom.put("/roomConfig/timeOfQuestion", Integer.parseInt(selectedChipTime.getText().toString()));
+        }
+        if(!code.equals(currentRoom.getRoomConfig().getCode())) {
+            newRoom.put("/roomConfig/code", code);
         }
         if(newRoom.isEmpty()){
             Util.showToastLog("No hay cambios", getContext());
             ls.hideLoading();
             return;
         }
-        System.out.println(newRoom);
+
         roomService.updateRoom(
                 idRoom,
                 newRoom,

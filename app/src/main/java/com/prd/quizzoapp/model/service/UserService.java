@@ -7,6 +7,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.prd.quizzoapp.model.entity.User;
 import com.prd.quizzoapp.model.entity.UserRoom;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.util.Util;
 
 public class UserService {

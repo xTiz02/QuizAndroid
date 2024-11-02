@@ -25,11 +25,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentRoomBinding;
+import com.prd.quizzoapp.model.dto.QuizRequestDto;
+import com.prd.quizzoapp.model.entity.Question;
+import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.entity.UserRoom;
-import com.prd.quizzoapp.model.service.ActionCallback;
+import com.prd.quizzoapp.model.service.LoadingService;
+import com.prd.quizzoapp.model.service.QuizServerImpl;
 import com.prd.quizzoapp.model.service.RoomService;
-import com.prd.quizzoapp.util.Data;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
+import com.prd.quizzoapp.model.service.intf.QuizServerService;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 import com.prd.quizzoapp.views.quiz.QuizActivity;
@@ -37,6 +43,8 @@ import com.prd.quizzoapp.views.quiz.QuizActivity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class RoomFragment extends Fragment {
@@ -44,17 +52,16 @@ public class RoomFragment extends Fragment {
     private UserAdapter userAdapter;
     private FragmentRoomBinding binding;
     private RoomService rS;
+    private LoadingService ls;
     private String idRoom;
     private boolean isAdmin = false;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private QuizRequestDto quizRequestDto;
 
     public RoomFragment() {
         // Required empty public constructor
     }
-
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -76,24 +83,17 @@ public class RoomFragment extends Fragment {
         rS = new RoomService(getContext());
         DatabaseReference dbRoomRef = db.getReference("rooms").child(idRoom);
         userAdapter = new UserAdapter(new ArrayList<>());
+        ls = new LoadingService(getContext());
         binding.rvUsers.setHasFixedSize(true);
         binding.rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvUsers.setAdapter(userAdapter);
 
-        //Copiar en portapapeles el código de la sala
         binding.btnCopy.setOnClickListener(v -> {
             String roomCode = binding.tvCode.getText().toString();
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Room Code", roomCode);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(getContext(), "Código de la sala copiado", Toast.LENGTH_SHORT).show();
-        });
-        binding.btnStartGame.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), QuizActivity.class);
-            //enviar una lista de preguntas al QuizActivity
-            //Cada jugador estara esperando las preguntas del webSocket
-             intent.putExtra("questions", Data.getQuestions());
-            startActivity(intent);
         });
 
         binding.roomConfig.setOnClickListener(v -> {
@@ -106,8 +106,7 @@ public class RoomFragment extends Fragment {
                 @Override
                 public void onSuccess() {
                     if(!isAdmin){
-                        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
-                        navController.navigate(R.id.homeFragment);
+                        navToHome();
                     }
                 }
 
@@ -118,24 +117,29 @@ public class RoomFragment extends Fragment {
             });
         });
 
-        //obtener la lista de usuarios de la sala
-       /* dbRoomRef.child("usersRoom").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                        UserRoom userRoom = userSnapshot.getValue(UserRoom.class);
-                        System.out.println("Usuario inicial en la sala: " + userRoom);
-                        userAdapter.addUser(userRoom); // Añadir a la lista inicial
-                    }
+        binding.btnStartGame.setOnClickListener(v -> {
+            ls.showLoading("Generando preguntas");
+            QuizServerService quizServer = new QuizServerImpl();
+            System.out.println("Se va a generar las preguntas");
+            System.out.println(quizRequestDto);
+            quizServer.generateQuestions(quizRequestDto, new DataActionCallback<List<Question>>() {
+                @Override
+                public void onSuccess(List<Question> data) {
+                    Intent intent = new Intent(getContext(), QuizActivity.class);
+                    intent.putExtra("questions", new ArrayList<>(data));
+                    startActivity(intent);
+                    ls.hideLoading();
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Error al obtener los usuarios de la sala", Toast.LENGTH_SHORT).show();
-            }
-        });*/
+                @Override
+                public void onFailure(Exception e) {
+                    ls.hideLoading();
+                }
+            });
+
+
+        });
+
 
         //Obtener conf de la sala
         dbRoomRef.child("settings").addValueEventListener(new ValueEventListener() {
@@ -143,7 +147,8 @@ public class RoomFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     System.out.println("Se obtuvo la conf de la sala: " + snapshot.getValue());
-                    RoomConfig roomConfig = snapshot.child("roomConfig").getValue(RoomConfig.class);
+                    Room room = snapshot.getValue(Room.class);
+                    RoomConfig roomConfig = room.getRoomConfig();
                     binding.tvCode.setText(roomConfig.getCode());
                     if(auth.getUid().toString().equals(roomConfig.getUuidAdmin())){
                         isAdmin = true;
@@ -154,10 +159,15 @@ public class RoomFragment extends Fragment {
                         isAdmin = false;
                         binding.btnLeaveRoom.setVisibility(View.VISIBLE);
                     }
+                    quizRequestDto = new QuizRequestDto(
+                            roomConfig.getQuestions(),
+                            room.getCategories().stream()
+                                    .map(category -> category.getCategory().getName())
+                                    .collect(Collectors.toCollection(ArrayList::new)),
+                            room.getSubCategories());
                 }else {
                     DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
-                    NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
-                    navController.navigate(R.id.homeFragment);
+                    navToHome();
                 }
             }
 
@@ -201,6 +211,11 @@ public class RoomFragment extends Fragment {
             }
         });
 
+    }
+
+    private void navToHome(){
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+        navController.navigate(R.id.homeFragment);
     }
 
 

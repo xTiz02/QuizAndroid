@@ -1,10 +1,15 @@
 package com.prd.quizzoapp.model.entity;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 
 public class QuestionOption implements Serializable {
+    @Expose
     private String uuid;
+    @Expose
     private String option;
+    @Expose
     private boolean correct;
 
     public QuestionOption(String uuid, String option, boolean correct) {

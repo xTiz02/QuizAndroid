@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.prd.quizzoapp.MainActivity;
 import com.prd.quizzoapp.databinding.ActivityLoginBinding;
 import com.prd.quizzoapp.model.service.AccountService;
-import com.prd.quizzoapp.model.service.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
 
 public class LoginActivity extends AppCompatActivity {

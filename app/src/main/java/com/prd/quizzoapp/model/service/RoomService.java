@@ -15,6 +15,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.RoomConfig;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 
@@ -79,7 +81,7 @@ public class RoomService {
     }
 
     public void updateRoom(String roomUuid,Map<String,Object> data, ActionCallback callback){
-        dbRef.child(roomUuid).child("settings/roomConfig").updateChildren(data).addOnCompleteListener(task -> {
+        dbRef.child(roomUuid).child("settings").updateChildren(data).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 callback.onSuccess();
             }else {

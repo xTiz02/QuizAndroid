@@ -1,4 +1,4 @@
-package com.prd.quizzoapp.model.service;
+package com.prd.quizzoapp.model.service.intf;
 
 public interface ActionCallback {
     void onSuccess();

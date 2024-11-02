@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.prd.quizzoapp.model.entity.User;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.util.Util;
 
 public class AccountService {
@@ -20,7 +21,7 @@ public class AccountService {
         us = new UserService(context);
     }
 
-    public void createUser(String username, String email, String password,ActionCallback callback){
+    public void createUser(String username, String email, String password, ActionCallback callback){
 
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
