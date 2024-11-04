@@ -1,18 +1,16 @@
 package com.prd.quizzoapp.model.service.intf;
 
 import com.prd.quizzoapp.model.dto.QuizRequestDto;
-import com.prd.quizzoapp.model.entity.Question;
-
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface RetroApiService {
 
-    @POST("chat")
-    Call<List<Question>> getQuestions(@Body QuizRequestDto quizRequestDto);
+    @POST("api/{roomUUID}/send")
+    Call<String> getQuestions(@Body QuizRequestDto quizRequestDto,@Path("roomUUID") String roomUUID);
 
 
 

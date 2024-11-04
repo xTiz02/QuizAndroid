@@ -54,6 +54,10 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.10.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    //Scalars Converter
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+// Server Sent Events
+    implementation("com.squareup.okhttp3:okhttp-sse:4.9.3")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

@@ -3,7 +3,6 @@ package com.prd.quizzoapp.views.room;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentRoomBinding;
 import com.prd.quizzoapp.model.dto.QuizRequestDto;
-import com.prd.quizzoapp.model.entity.Question;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.entity.UserRoom;
@@ -38,12 +36,10 @@ import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.intf.QuizServerService;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
-import com.prd.quizzoapp.views.quiz.QuizActivity;
 
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -53,11 +49,13 @@ public class RoomFragment extends Fragment {
     private FragmentRoomBinding binding;
     private RoomService rS;
     private LoadingService ls;
+    private QuizServerService qs;
     private String idRoom;
     private boolean isAdmin = false;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private QuizRequestDto quizRequestDto;
+    String receive;
 
     public RoomFragment() {
         // Required empty public constructor
@@ -80,6 +78,7 @@ public class RoomFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentRoomBinding.bind(view);
         idRoom = DataSharedPreference.getData(Util.ROOM_UUID_KEY, getContext());
+        qs = new QuizServerImpl();
         rS = new RoomService(getContext());
         DatabaseReference dbRoomRef = db.getReference("rooms").child(idRoom);
         userAdapter = new UserAdapter(new ArrayList<>());
@@ -102,6 +101,7 @@ public class RoomFragment extends Fragment {
         });
 
         binding.btnLeaveRoom.setOnClickListener(v -> {
+            qs.disconnectSseServer();
             rS.deleteRoom(idRoom, auth.getUid().toString(), isAdmin, new ActionCallback() {
                 @Override
                 public void onSuccess() {
@@ -118,16 +118,13 @@ public class RoomFragment extends Fragment {
         });
 
         binding.btnStartGame.setOnClickListener(v -> {
-            ls.showLoading("Generando preguntas");
-            QuizServerService quizServer = new QuizServerImpl();
-            System.out.println("Se va a generar las preguntas");
-            System.out.println(quizRequestDto);
-            quizServer.generateQuestions(quizRequestDto, new DataActionCallback<List<Question>>() {
+            ls.showLoading("Generando preguntas ...");
+            qs.generateQuestions(quizRequestDto,idRoom, new ActionCallback() {
                 @Override
-                public void onSuccess(List<Question> data) {
-                    Intent intent = new Intent(getContext(), QuizActivity.class);
+                public void onSuccess() {
+                    /*Intent intent = new Intent(getContext(), QuizActivity.class);
                     intent.putExtra("questions", new ArrayList<>(data));
-                    startActivity(intent);
+                    startActivity(intent);*/
                     ls.hideLoading();
                 }
 
@@ -136,9 +133,21 @@ public class RoomFragment extends Fragment {
                     ls.hideLoading();
                 }
             });
-
-
         });
+
+        //Conectar al servidor de eventos
+        qs.connectToSseServer(idRoom, new DataActionCallback<String>() {
+            @Override
+            public void onSuccess(String data) {
+                receive = data;
+                System.out.println("Data recibida en el activity: "+receive);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+            }
+        });
+
 
 
         //Obtener conf de la sala
