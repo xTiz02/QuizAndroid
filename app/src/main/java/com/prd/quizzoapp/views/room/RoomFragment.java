@@ -31,8 +31,8 @@ import com.prd.quizzoapp.model.entity.UserRoom;
 import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.model.service.QuizServerImpl;
 import com.prd.quizzoapp.model.service.RoomService;
+import com.prd.quizzoapp.model.service.SseManager;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
-import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.intf.QuizServerService;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
@@ -55,7 +55,6 @@ public class RoomFragment extends Fragment {
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private final FirebaseDatabase db = FirebaseDatabase.getInstance();
     private QuizRequestDto quizRequestDto;
-    String receive;
 
     public RoomFragment() {
         // Required empty public constructor
@@ -101,20 +100,21 @@ public class RoomFragment extends Fragment {
         });
 
         binding.btnLeaveRoom.setOnClickListener(v -> {
-            qs.disconnectSseServer();
-            rS.deleteRoom(idRoom, auth.getUid().toString(), isAdmin, new ActionCallback() {
-                @Override
-                public void onSuccess() {
-                    if(!isAdmin){
-                        navToHome();
+            ls.leaveToRoomDialog(()->{
+                rS.deleteRoom(idRoom, auth.getUid().toString(), isAdmin, new ActionCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if(!isAdmin){
+                            navToHome();
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Exception e) {
-                    Toast.makeText(getContext(), "Error al dejar la sala", Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(getContext(), "Error al dejar la sala", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            },isAdmin);
         });
 
         binding.btnStartGame.setOnClickListener(v -> {
@@ -136,7 +136,8 @@ public class RoomFragment extends Fragment {
         });
 
         //Conectar al servidor de eventos
-        qs.connectToSseServer(idRoom, new DataActionCallback<String>() {
+        SseManager.getInstance().connect(idRoom);
+        /*qs.connectToSseServer(idRoom, new DataActionCallback<String>() {
             @Override
             public void onSuccess(String data) {
                 receive = data;
@@ -146,7 +147,7 @@ public class RoomFragment extends Fragment {
             @Override
             public void onFailure(Exception e) {
             }
-        });
+        });*/
 
 
 

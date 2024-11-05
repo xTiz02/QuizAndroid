@@ -11,11 +11,13 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.prd.quizzoapp.databinding.ActivityMainBinding;
+import com.prd.quizzoapp.model.service.SseManager;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SseManager.SseListener {
 
+    private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private NavController navController;
     @Override
@@ -26,11 +28,18 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initNavigation();
+        SseManager.getInstance().addListener(this);
 
 
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SseManager.getInstance().removeListener(this);
+        SseManager.getInstance().disconnect();
+    }
 
     private void initNavigation(){
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
@@ -77,5 +86,20 @@ public class MainActivity extends AppCompatActivity {
 
 
         );
+    }
+
+    @Override
+    public void onMessageReceived(String message) {
+        System.out.println("Data recibida en el main: "+message);
+    }
+
+    @Override
+    public void onConnectionError(Throwable t) {
+       Util.showLog(TAG,"Error en la conexión escuchado en main:"+ t.getMessage());
+    }
+
+    @Override
+    public void onClosed() {
+        Util.showLog("SseManager", "Conexión cerrada por el servidor");
     }
 }

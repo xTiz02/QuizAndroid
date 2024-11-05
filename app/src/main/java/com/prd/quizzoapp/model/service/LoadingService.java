@@ -92,4 +92,17 @@ public class LoadingService {
     public void hideLoadingWithMessageAndTitleAndIconAndButton() {
         alertDialog.dismiss();
     }*/
+
+    //dialog with button and action to press the button
+    public void leaveToRoomDialog( Runnable action, boolean isAdmin) {
+        String nota = isAdmin ? "Nota: Si eres el administrador de la sala, al salir de la sala, esta se cerrará." : "Se redirigirá a la pantalla principal";
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle("¿Estás seguro de que deseas salir de la sala?")
+                .setMessage(nota)
+                .setPositiveButton("Salir", (dialog, which) -> {
+                    action.run();
+                }).setCancelable(true)
+                .create();
+        alertDialog.show();
+    }
 }

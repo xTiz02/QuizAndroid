@@ -30,12 +30,14 @@ public class RoomService {
     private LoadingService ls;
     private UserService us;
     private DatabaseReference dbRef;
+    private QuizServerImpl quizServer;
 
     public RoomService(Context context) {
         auth = FirebaseAuth.getInstance();
         this.context = context;
         ls = new LoadingService(context);
         us = new UserService(context);
+        quizServer = new QuizServerImpl();
         dbRef = FirebaseDatabase.getInstance().getReference("rooms");
     }
 
@@ -132,7 +134,18 @@ public class RoomService {
         if(isAdmin){
             dbRef.child(roomUUID).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
-                    callback.onSuccess();
+                    quizServer.deleteRoomSse(roomUUID, new ActionCallback() {
+                        @Override
+                        public void onSuccess() {
+                            DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
+                            callback.onSuccess();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            callback.onFailure(e);
+                        }
+                    });
                 }else {
                     callback.onFailure(task.getException());
                 }
@@ -140,6 +153,7 @@ public class RoomService {
         }else {
             dbRef.child(roomUUID).child("usersRoom").child(userUuid).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
+                    SseManager.getInstance().disconnect();
                     DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
                     callback.onSuccess();
                 }else {

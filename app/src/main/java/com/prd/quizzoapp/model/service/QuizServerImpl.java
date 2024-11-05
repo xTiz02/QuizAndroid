@@ -7,14 +7,12 @@ import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.intf.QuizServerService;
 import com.prd.quizzoapp.model.service.intf.RetroApiService;
+import com.prd.quizzoapp.util.Util;
 
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSourceListener;
-import okhttp3.sse.EventSources;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -76,9 +74,10 @@ public class QuizServerImpl implements QuizServerService {
                 .header("Accept", "application/json; q=0.5")
                 .addHeader("Accept", "text/event-stream")
                 .build();*/
-        OkHttpClient client = new OkHttpClient.Builder()
-                .readTimeout(5, TimeUnit.MINUTES)
-                .writeTimeout(5, TimeUnit.MINUTES)
+        /*OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.MINUTES)
+                .writeTimeout(20, TimeUnit.MINUTES)
                 .build();
         Request request = new Request.Builder()
                 .url("http://10.0.2.2:8085/sse/"+roomUUID+"/stream")
@@ -97,7 +96,7 @@ public class QuizServerImpl implements QuizServerService {
             public void onClosed(EventSource eventSource) {
                 super.onClosed(eventSource);
                 Log.d(TAG, "Connection Closed");
-
+                disconnectSseServer();
             }
 
             @Override
@@ -120,15 +119,34 @@ public class QuizServerImpl implements QuizServerService {
                 }
             }
         };
-        this.eventSource = EventSources.createFactory(client).newEventSource(request, eventSourceListener);
+        this.eventSource = EventSources.createFactory(client).newEventSource(request, eventSourceListener);*/
     }
-
     @Override
     public void disconnectSseServer() {
         if (eventSource != null) {
             eventSource.cancel();
             eventSource = null;
-            Log.d(TAG, "Conexion cerrada por cliente.");
+            Log.d(TAG, "Conexion cerrada");
         }
+    }
+
+    @Override
+    public void deleteRoomSse(String roomUUID, ActionCallback callback) {
+        retroApiService.deleteRoomSse(roomUUID).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    System.out.println(response.body().toString());
+                    Log.d("QuizServerImpl", "onResponse: en eliminar la sala");
+                    callback.onSuccess();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Util.showLog("QuizServerImpl", "onFailure: en eliminar la sala" + t);
+                callback.onFailure(new Exception(t));
+            }
+        });
     }
 }
