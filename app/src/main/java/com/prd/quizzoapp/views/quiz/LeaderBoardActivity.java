@@ -1,11 +1,13 @@
 package com.prd.quizzoapp.views.quiz;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.prd.quizzoapp.MainActivity;
 import com.prd.quizzoapp.databinding.ActivityLeaderBoardBinding;
 import com.prd.quizzoapp.model.entity.UserResult;
 import com.prd.quizzoapp.util.Data;
@@ -32,6 +34,11 @@ public class LeaderBoardActivity extends AppCompatActivity {
         binding.leaderBoardRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.leaderBoardRecyclerView.setAdapter(adapter);
         printTop3(userResults);
+        binding.btnBackToRoom.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void printTop3(ArrayList<UserResult> results) {

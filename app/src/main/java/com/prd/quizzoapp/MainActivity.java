@@ -1,25 +1,42 @@
 package com.prd.quizzoapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.databinding.ActivityMainBinding;
+import com.prd.quizzoapp.model.dto.QuestionsListDto;
 import com.prd.quizzoapp.model.service.SseManager;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
+import com.prd.quizzoapp.views.quiz.QuizActivity;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements SseManager.SseListener {
 
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
+    private DatabaseReference dbRef;
     private NavController navController;
+    private FirebaseAuth auth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,11 +46,54 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         setContentView(binding.getRoot());
         initNavigation();
         SseManager.getInstance().addListener(this);
-
-
-
+         auth = FirebaseAuth.getInstance();
+        dbRef = FirebaseDatabase.getInstance().getReference("users");
+        dbRef.child(auth.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    System.out.println("snapshot: "+snapshot);
+                    binding.tvUserName.setText(snapshot.child("username").getValue().toString());
+                    Picasso.get().load(snapshot.child("img").getValue().toString()).into(binding.mainProfileImage);
+                }else {
+                    binding.tvUserName.setText("loading...");
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Util.showLog(TAG, "Error al obtener la sala del usuario");
+            }
+        });
     }
-
+    @Override
+    public void onMessageReceived(QuestionsListDto questions) {
+        //esperar 4 segundos para que el usuario pueda leer el mensaje
+        Util.delay(4000,"La partida va a comenzar ...",this,
+                ()->{//before
+                },
+                () -> {
+                    Intent intent = new Intent(this, QuizActivity.class);
+                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
+                    startActivity(intent);
+                    finish();
+                });
+    }
+    @Override
+    public void onConnectionError(Throwable t) {
+        //DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
+        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+        navController.navigate(R.id.homeFragment);
+        Util.showLog(TAG,"Error en la conexión escuchando en main:"+ t.getMessage());
+        Toast.makeText(this, "Error en la conexión de la sala", Toast.LENGTH_LONG).show();
+    }
+    @Override
+    public void onClosed() {
+        DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
+        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+        navController.navigate(R.id.notRoomFragment);
+        Toast.makeText(this, "Se cerro la sala", Toast.LENGTH_LONG).show();
+        Util.showLog("SseManager", "Conexión cerrada por el servidor");
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -60,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                 }else {
                     navController.navigate(item.getItemId());
                 }
-            }else{
+            }else {
                 navController.navigate(item.getItemId());
             }
             return true;
@@ -75,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
             }
         });
     }
-
     private void hideSystemUI() {
         // Ocultar la barra de navegación y poner la pantalla en modo inmersivo
         getWindow().getDecorView().setSystemUiVisibility(
@@ -88,18 +147,4 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         );
     }
 
-    @Override
-    public void onMessageReceived(String message) {
-        System.out.println("Data recibida en el main: "+message);
-    }
-
-    @Override
-    public void onConnectionError(Throwable t) {
-       Util.showLog(TAG,"Error en la conexión escuchado en main:"+ t.getMessage());
-    }
-
-    @Override
-    public void onClosed() {
-        Util.showLog("SseManager", "Conexión cerrada por el servidor");
-    }
 }

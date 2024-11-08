@@ -122,15 +122,13 @@ public class RoomFragment extends Fragment {
             qs.generateQuestions(quizRequestDto,idRoom, new ActionCallback() {
                 @Override
                 public void onSuccess() {
-                    /*Intent intent = new Intent(getContext(), QuizActivity.class);
-                    intent.putExtra("questions", new ArrayList<>(data));
-                    startActivity(intent);*/
                     ls.hideLoading();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
                     ls.hideLoading();
+                    Toast.makeText(getContext(), "Error al generar preguntas", Toast.LENGTH_SHORT).show();
                 }
             });
         });

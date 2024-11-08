@@ -12,26 +12,29 @@
         android:layout_height="match_parent"
         android:background="@color/white"
         tools:context=".views.acc.RegisterActivity">
-        <ImageView
-            android:id="@+id/ivSinUpLogo"
-            android:layout_width="350dp"
-            android:layout_height="280dp"
-            android:src="@drawable/sin_up_icon"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profilerg0"
+            android:layout_width="151dp"
+            android:layout_height="130dp"
+            android:src="@drawable/photocamera"
+            android:layout_marginVertical="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="image" />
+            app:layout_constraintTop_toBottomOf="@+id/tvSinUp"
+            app:layout_constraintBottom_toTopOf="@+id/tilName"
+            />
         <TextView
             android:id="@+id/tvSinUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Registro"
+            android:layout_marginTop="8dp"
             android:textSize="36sp"
             android:textStyle="bold"
             android:layout_marginStart="40dp"
             android:textColor="@color/black"
-            app:layout_constraintTop_toBottomOf="@id/ivSinUpLogo"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             />
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilName"
@@ -47,7 +50,7 @@
             app:boxCornerRadiusTopStart="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvSinUp"
+            app:layout_constraintTop_toBottomOf="@id/profilerg0"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             >
             <EditText

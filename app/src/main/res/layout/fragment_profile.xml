@@ -1,14 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_gray"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".views.acc.ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Perfil" />
+        android:layout_height="?actionBarSize"
+        android:gravity="center"
+        android:text="Perfil"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/light_gray_1"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-</FrameLayout>
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/userProfilePic"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:src="@drawable/photocamera"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toBottomOf="@id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        />
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Correo"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/light_gray_1"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/userProfilePic"
+        />
+    <TextView
+        android:id="@+id/tvEmailId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Email@gmail.com"
+        android:textSize="18sp"
+        android:textColor="@color/light_gray_1"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName"
+        />
+
+    <EditText
+        android:id="@+id/edtUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Username"
+        android:textColorHint="@color/light_gray_1"
+        app:layout_constraintBottom_toTopOf="@+id/edtDescp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvEmailId"
+         />
+
+    <EditText
+        android:id="@+id/edtDescp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Descripción"
+        android:textColorHint="@color/light_gray_1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btnsave"
+        app:layout_constraintTop_toBottomOf="@+id/edtUsername"
+         />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnsave"
+        android:background="@drawable/rounded_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        app:cornerRadius="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtDescp"
+         />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -58,6 +58,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 // Server Sent Events
     implementation("com.squareup.okhttp3:okhttp-sse:4.9.3")
+    //Circle Image View
+    implementation("de.hdodenhof:circleimageview:3.1.0")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }

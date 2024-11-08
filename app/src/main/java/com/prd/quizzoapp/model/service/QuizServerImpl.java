@@ -46,6 +46,8 @@ public class QuizServerImpl implements QuizServerService {
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()) {
                     callback.onSuccess();
+                }else {
+                    callback.onFailure(new Exception("Error al generar las preguntas"));
                 }
             }
 

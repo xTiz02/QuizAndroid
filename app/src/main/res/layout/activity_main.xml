@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
 
-    <FrameLayout
+    <!--<FrameLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:background="@color/colorPurple"
@@ -24,7 +24,59 @@
             android:text="@string/app_name"
             android:textColor="@color/white"
             android:layout_gravity="center"/>
-    </FrameLayout>
+    </FrameLayout>-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPurple"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvUserName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="@font/roboto_medium"
+            android:text="User777"
+            android:textColor="@color/light_gray_1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/mainProfileImage"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/mainProfileImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_pic"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
+
+        <ImageView
+            android:id="@+id/ivLogout"
+            android:layout_width="45dp"
+            android:layout_height="55dp"
+            android:background="@drawable/button_back"
+            android:elevation="16dp"
+            android:padding="8dp"
+            android:src="@drawable/exit_to_app_24px"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/dark_gray_2" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <androidx.fragment.app.FragmentContainerView
@@ -38,6 +90,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/bottomNavView"
         app:navGraph="@navigation/main_graph" />
+
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavView"
         android:layout_width="0dp"

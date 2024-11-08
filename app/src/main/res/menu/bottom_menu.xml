@@ -9,13 +9,13 @@
 
     <item
         android:id="@+id/roomFragment"
-        android:icon="@drawable/home_24px"
+        android:icon="@drawable/meeting_room_24px"
         android:title="Sala"
         app:fontFamily="@font/roboto_bold"/>
 
     <item
         android:id="@+id/profileFragment"
-        android:icon="@drawable/home_24px"
+        android:icon="@drawable/account_circle_24px"
         android:title="Perfil"
         app:fontFamily="@font/roboto_bold"/>
 </menu>

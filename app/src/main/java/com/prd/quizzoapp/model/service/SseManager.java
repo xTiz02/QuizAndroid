@@ -2,6 +2,7 @@ package com.prd.quizzoapp.model.service;
 
 import androidx.annotation.NonNull;
 
+import com.prd.quizzoapp.model.dto.QuestionsListDto;
 import com.prd.quizzoapp.util.Util;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class SseManager {
     private final List<SseListener> listeners = new ArrayList<>();
 
     public interface SseListener {
-        void onMessageReceived(String message);
+        void onMessageReceived(QuestionsListDto questions);
         void onConnectionError(Throwable t);
         void onClosed();
     }
@@ -58,17 +59,20 @@ public class SseManager {
             @Override
             public void onEvent(EventSource eventSource, String id, String type, String data) {
                 Util.showLog("SseManager", "Mensaje recibido: " + data);
+                //parse data to QuestionsListDto class using gson
+                QuestionsListDto questionsListDto = Util.getGson().fromJson(data, QuestionsListDto.class);
+
                 for (SseListener listener : listeners) {
-                    listener.onMessageReceived(data);
+                    listener.onMessageReceived(questionsListDto);
                 }
             }
 
             @Override
             public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
                 Util.showLog("SseManager", "Error general en la conexión: " + t.getMessage());
-                /*if (t != null) {
+                if (t != null) {
                     t.printStackTrace();
-                }*/
+                }
                 disconnect();
                 for (SseListener listener : listeners) {
                     listener.onConnectionError(t);

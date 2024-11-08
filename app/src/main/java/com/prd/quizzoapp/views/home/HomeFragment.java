@@ -92,7 +92,7 @@ public class HomeFragment extends Fragment {
 
         binding.btnFindRoom.setOnClickListener(v -> {
             //mostrar dialog
-            Dialog dialog = new Dialog(requireContext());
+            Dialog dialog = new Dialog(getContext());
             dialog.setContentView(R.layout.find_room_dialog);
             dialog.setCancelable(true);
             dialog.show();
