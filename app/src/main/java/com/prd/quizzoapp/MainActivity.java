@@ -3,7 +3,6 @@ package com.prd.quizzoapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -81,18 +80,28 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     @Override
     public void onConnectionError(Throwable t) {
         //DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
-        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
-        navController.navigate(R.id.homeFragment);
-        Util.showLog(TAG,"Error en la conexión escuchando en main:"+ t.getMessage());
-        Toast.makeText(this, "Error en la conexión de la sala", Toast.LENGTH_LONG).show();
+        Util.delay(3000,"Error al conectar con la sala",this,
+                ()->{//before
+                },
+                () -> {
+                    NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+                    navController.navigate(R.id.homeFragment);
+                    Util.showLog(TAG,"Error en la conexión escuchando en main:"+ t.getMessage());
+                });
     }
     @Override
     public void onClosed() {
-        DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
-        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
-        navController.navigate(R.id.notRoomFragment);
-        Toast.makeText(this, "Se cerro la sala", Toast.LENGTH_LONG).show();
-        Util.showLog("SseManager", "Conexión cerrada por el servidor");
+        if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null) {
+            Util.delay(4000,"La sala ya no está disponible",this,
+                    ()->{
+                        DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
+                    },
+                    () -> {
+                        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+                        navController.navigate(R.id.homeFragment);
+                        Util.showLog(TAG,"El servidor cerro la sala main");
+                    });
+        }
     }
     @Override
     protected void onDestroy() {

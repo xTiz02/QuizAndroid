@@ -21,6 +21,7 @@ public class App extends Application {
             @Override
             public void onActivityStarted(Activity activity) {
                 activityReferences++;
+                Util.showLog("App", "Actualmente hay " + activityReferences + " referencias a la actividad");
             }
 
             @Override

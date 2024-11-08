@@ -48,15 +48,15 @@ public class Util {
         return gson;
     }
 
-    public static void  delay(int time,String message,Context context,Runnable beforeDelay,Runnable afterDelay){
+    public static void delay(int time,String message,Context context,Runnable beforeDelay,Runnable afterDelay){
         new Handler(Looper.getMainLooper()).post(() -> {
             LoadingService loadingService = new LoadingService(context);
             loadingService.showLoading(message);
 
-            beforeDelay.run(); // Ejecuta beforeDelay en el hilo principal antes del delay
+            beforeDelay.run();
 
             new Handler().postDelayed(() -> {
-                afterDelay.run(); // Ejecuta afterDelay en el hilo principal después del delay
+                afterDelay.run();
                 loadingService.hideLoading();
             }, time);
         });

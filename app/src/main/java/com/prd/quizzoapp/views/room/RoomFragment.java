@@ -134,7 +134,6 @@ public class RoomFragment extends Fragment {
         });
 
         //Conectar al servidor de eventos
-        SseManager.getInstance().connect(idRoom);
         /*qs.connectToSseServer(idRoom, new DataActionCallback<String>() {
             @Override
             public void onSuccess(String data) {
@@ -154,6 +153,7 @@ public class RoomFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+                    SseManager.getInstance().connect(idRoom);
                     System.out.println("Se obtuvo la conf de la sala: " + snapshot.getValue());
                     Room room = snapshot.getValue(Room.class);
                     RoomConfig roomConfig = room.getRoomConfig();
@@ -176,6 +176,7 @@ public class RoomFragment extends Fragment {
                 }else {
                     DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
                     navToHome();
+                    Toast.makeText(getContext(), "La sala en la que estabas ya no existe", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -184,7 +185,7 @@ public class RoomFragment extends Fragment {
                 Toast.makeText(getContext(), "Error al obtener la sala", Toast.LENGTH_SHORT).show();
             }
         });
-
+        //Conectar al servidor de eventos
         //Obtener los usuarios de la sala
         dbRoomRef.child("usersRoom").orderByChild("admin").addChildEventListener(new ChildEventListener() {
             @Override

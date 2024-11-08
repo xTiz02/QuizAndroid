@@ -37,7 +37,7 @@ public class SseManager {
 
     private SseManager() {
         client = new OkHttpClient.Builder()
-                .connectTimeout(15, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.MINUTES)
                 .writeTimeout(20, TimeUnit.MINUTES)
                 .build();
