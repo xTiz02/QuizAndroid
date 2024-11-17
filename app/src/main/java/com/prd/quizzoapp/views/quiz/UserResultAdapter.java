@@ -1,5 +1,6 @@
 package com.prd.quizzoapp.views.quiz;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +16,11 @@ import java.util.ArrayList;
 public class UserResultAdapter extends RecyclerView.Adapter<UserResultViewHolder> {
 
     private ArrayList<UserResult> users;
+    private Context context;
 
-    public UserResultAdapter(ArrayList<UserResult> users) {
+    public UserResultAdapter(ArrayList<UserResult> users, Context context) {
         this.users = users;
+        this.context = context;
     }
 
     @NonNull
@@ -30,7 +33,7 @@ public class UserResultAdapter extends RecyclerView.Adapter<UserResultViewHolder
     @Override
     public void onBindViewHolder(@NonNull UserResultViewHolder holder, int position) {
         UserResult user = users.get(position);
-        holder.bind(user,position);
+        holder.bind(user,position,context);
     }
 
     @Override

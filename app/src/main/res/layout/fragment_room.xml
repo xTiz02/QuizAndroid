@@ -9,12 +9,21 @@
     android:paddingVertical="8dp"
     tools:context=".views.room.RoomFragment">
 
+    <LinearLayout
+        android:id="@+id/llCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
     <androidx.cardview.widget.CardView
         android:id="@+id/cardCode2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="@color/dark_gray_3"
         app:cardCornerRadius="16dp"
+        android:layout_weight="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -24,7 +33,6 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="16dp">
-
             <TextView
                 android:id="@+id/tvCode"
                 android:layout_width="0dp"
@@ -60,10 +68,23 @@
                     android:textColor="@color/light_gray_1"
                     android:textSize="14sp" />
             </LinearLayout>
-
         </LinearLayout>
-
     </androidx.cardview.widget.CardView>
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ver"
+        android:background="@drawable/rounded_box"
+        android:textColor="@color/dark_gray_4"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:layout_marginStart="16dp"
+        android:layout_weight="0.2"
+        android:layout_gravity="end|center"
+        android:id="@+id/btnShare"/>
+    </LinearLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUsers"
@@ -73,7 +94,7 @@
         app:layout_constraintBottom_toTopOf="@+id/llButtons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardCode2"/>
+        app:layout_constraintTop_toBottomOf="@+id/llCode"/>
     <!--<androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnStartGame"
         android:layout_width="0dp"

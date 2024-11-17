@@ -6,7 +6,7 @@ public class UserResult {
     private String userUuid;
     private double score;
     private String username;
-    private int img;
+    private String img;
     private int correctAnswers;
     private int wrongAnswers;
     private double time;
@@ -15,7 +15,7 @@ public class UserResult {
     public UserResult() {
     }
 
-    public UserResult(String userUuid, double score, String username, int img, int correctAnswers, int wrongAnswers,double time, boolean played) {
+    public UserResult(String userUuid, double score, String username, String img, int correctAnswers, int wrongAnswers,double time, boolean played) {
         this.userUuid = userUuid;
         this.score = score;
         this.username = username;
@@ -74,11 +74,11 @@ public class UserResult {
         this.username = username;
     }
 
-    public int getImg() {
+    public String getImg() {
         return img;
     }
 
-    public void setImg(int img) {
+    public void setImg(String img) {
         this.img = img;
     }
 

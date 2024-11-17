@@ -19,6 +19,10 @@ import com.prd.quizzoapp.databinding.ActivityQuizBinding;
 import com.prd.quizzoapp.model.entity.Question;
 import com.prd.quizzoapp.model.entity.QuestionOption;
 import com.prd.quizzoapp.model.entity.Score;
+import com.prd.quizzoapp.model.service.ResultService;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.util.DataSharedPreference;
+import com.prd.quizzoapp.util.Util;
 
 import java.util.ArrayList;
 
@@ -27,6 +31,7 @@ public class QuizActivity extends AppCompatActivity {
     private ActivityQuizBinding binding;
     private ArrayList<Question> questions;
     private CountDownTimer timer;
+    private ResultService resultService;
     private boolean allowPlaying = true;
     private double timeLeft = 0;
     private int position = 0;
@@ -41,25 +46,34 @@ public class QuizActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        resultService = new ResultService(this);
         questions = (ArrayList<Question>) getIntent().getSerializableExtra("questions");
         binding.pbProgress.setMax(questions.size());
         binding.tvProgress.setText("1/" + questions.size());
         currentQuestion = questions.get(position);
-        startTimer();
         setQuestion();
-        setOptions();
-        binding.btnNext.setOnClickListener(v -> onNext());
+        //esperar 2 segundos
+        new CountDownTimer(2000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+            @Override
+            public void onFinish() {
+                setOptions();
+                startTimer();
+            }
+        }.start();
+        /*binding.btnNext.setOnClickListener(v -> onNext());
         binding.btnNext.setEnabled(false);
-        binding.btnNext.setVisibility(View.GONE);
+        binding.btnNext.setVisibility(View.GONE);*/
 
 
 
     }
 
     private void onNext() {
-        binding.btnNext.setEnabled(false);
-        binding.btnNext.setVisibility(View.GONE);
+       /* binding.btnNext.setEnabled(false);
+        binding.btnNext.setVisibility(View.GONE);*/
         Score scoreModel = new Score(
                 currentQuestion.getUuid(),
                 score,
@@ -68,21 +82,42 @@ public class QuizActivity extends AppCompatActivity {
         );
         System.out.println("Score: " + scoreModel);
         scoresList.add(scoreModel);
-        score = 0.0;
-        if (position < questions.size() - 1) {
-            timer.cancel();
-            position++;
-            clearLinearLayout();
-            currentQuestion = questions.get(position);
-            setQuestion();
-            setOptions();
-            binding.pbProgress.setProgress(position + 1);
-            binding.tvProgress.setText((position + 1) + "/" + questions.size());
-            allowPlaying = true;
-            startTimer();
-        } else {
-            endGame();
-        }
+        resultService.updateScore(
+                DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
+                scoresList,
+                new ActionCallback() {
+                    @Override
+                    public void onSuccess() {
+                        score = 0.0;
+                        if (position < questions.size() - 1) {
+                            timer.cancel();
+                            position++;
+                            clearLinearLayout();
+                            currentQuestion = questions.get(position);
+                            setQuestion();
+                            setOptions();
+                            binding.pbProgress.setProgress(position + 1);
+                            binding.tvProgress.setText((position + 1) + "/" + questions.size());
+                            allowPlaying = true;
+                            startTimer();
+                        } else {
+                            endGame();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(QuizActivity.this, "Error al guardar el score", Toast.LENGTH_LONG).show();
+                        /*if(questions.size() == scoresList.size()){
+                            Intent intent = new Intent(QuizActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }*/
+
+                    }
+                }
+        );
+
     }
 
     private void clearLinearLayout() {
@@ -133,8 +168,15 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(QuizActivity.this, "Se acabó el tiempo", Toast.LENGTH_SHORT).show();
                 marketCorrect = false;
                 setScore(false);
-                binding.btnNext.setEnabled(true);
-                binding.btnNext.setVisibility(View.VISIBLE);
+                new CountDownTimer(2000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                    }
+                    @Override
+                    public void onFinish() {
+                        onNext();
+                    }
+                }.start();
             }
         }.start();
     }
@@ -143,6 +185,8 @@ public class QuizActivity extends AppCompatActivity {
         AppCompatButton button = new AppCompatButton(this);
         if(option.getOption().length()>25){
             button.setTextSize(15);
+        }else {
+            button.setTextSize(20);
         }
         button.setText(option.getOption());
         button.setTag(option.isCorrect());
@@ -154,7 +198,6 @@ public class QuizActivity extends AppCompatActivity {
         button.setLayoutParams(layoutParams);
         Drawable background = ContextCompat.getDrawable(this, R.drawable.gray_button_bg);
         button.setBackground(background);
-        button.setTextSize(20);
         button.setAllCaps(false);
         button.setTypeface(null, Typeface.BOLD);
 
@@ -165,9 +208,11 @@ public class QuizActivity extends AppCompatActivity {
                     timer.cancel();
                     v.setBackground(ContextCompat.getDrawable(v.getContext(), R.drawable.button_1));
                     showCorrectAnswer(v);
-                    binding.btnNext.setVisibility(View.VISIBLE);
-                    binding.btnNext.setEnabled(true);
+                    /*binding.btnNext.setVisibility(View.VISIBLE);
+                    binding.btnNext.setEnabled(true);*/
                     allowPlaying = false;
+                    //esperar 2 segundos
+                    onNext();
                 }
             }
         });
@@ -202,128 +247,3 @@ public class QuizActivity extends AppCompatActivity {
 }
 
 
-/*
-
-//Actualizar un dato
-mDatabase.child("users").child(userId).child("username").setValue(name);
-* // Referencia al nodo de usuarios en una sala específica
-DatabaseReference userRef = database.getReference("rooms").child("idSala").child("users").child("user1");
-
-// Actualizar el nombre y el estado de listo del usuario
-Map<String, Object> userUpdates =  new HashMap<>();
-userUpdates.put("name", "John");
-userUpdates.put("readyToPlay", true);
-
-userRef.updateChildren(userUpdates)
-        .addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Log.d("Firebase", "Usuario actualizado.");
-            } else {
-                Log.d("Firebase", "Error al actualizar el usuario.", task.getException());
-            }
-        });*/
-
-
-/*
-* // Obtener la referencia de la base de datos
-FirebaseDatabase database = FirebaseDatabase.getInstance();
-DatabaseReference usersRef = database.getReference("rooms").child("idSala").child("users");
-
-// Agregar un ChildEventListener para escuchar cambios específicos en los usuarios
-usersRef.addChildEventListener(new ChildEventListener() {
-    @Override
-    public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-        // Se llama cuando se añade un nuevo usuario
-        UserRoom newUser = dataSnapshot.getValue(UserRoom.class);
-        Log.d("Firebase", "Nuevo usuario añadido: " + newUser.getName());
-    }
-
-    @Override
-    public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
-        // Se llama cuando cambia un atributo de un usuario
-        UserRoom updatedUser = dataSnapshot.getValue(UserRoom.class);
-        Log.d("Firebase", "Usuario actualizado: " + updatedUser.getName() + " está listo: " + updatedUser.isReadyToPlay());
-    }
-
-    @Override
-    public void onChildRemoved(DataSnapshot dataSnapshot) {
-        // Se llama cuando un usuario es eliminado
-        UserRoom removedUser = dataSnapshot.getValue(UserRoom.class);
-        Log.d("Firebase", "Usuario eliminado: " + removedUser.getName());
-    }
-
-    @Override
-    public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-        // Si se reorganizan los nodos (no común en este caso)
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
-        // Error de lectura
-        Log.e("Firebase", "Error: " + databaseError.getMessage());
-    }
-});*/
-
-/*
-* // Obtener la referencia de la base de datos
-FirebaseDatabase database = FirebaseDatabase.getInstance();
-DatabaseReference roomsRef = database.getReference("rooms");
-
-// Crear un nuevo nodo con un idSala único
-String idSala = roomsRef.push().getKey();  // Genera un ID único para la nueva sala
-if (idSala != null) {
-    // Crear un mapa con los valores de la sala
-    Map<String, Object> newRoom = new HashMap<>();
-    newRoom.put("code", "ABC123");
-    newRoom.put("questionNumber", 1);
-    newRoom.put("timer", 30);
-
-    // Insertar la nueva sala en la base de datos
-    roomsRef.child(idSala).setValue(newRoom)
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    // La inserción fue exitosa
-                    Log.d("Insert", "Sala creada con éxito.");
-                } else {
-                    // Hubo un error
-                    Log.d("Insert", "Error al crear la sala.", task.getException());
-                }
-            });
-}*/
-
-/*
-* @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_room);
-
-        // Inicializar la referencia de la sala
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        roomRef = database.getReference("rooms").child(idSala);
-
-        // Configurar el listener para escuchar cambios en el nodo de la sala
-        listenForRoomChanges();
-    }
-
-    private void listenForRoomChanges() {
-        roomRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Aquí puedes obtener los valores de la sala cuando cambian
-                if (dataSnapshot.exists()) {
-                    String code = dataSnapshot.child("code").getValue(String.class);
-                    Long questionNumber = dataSnapshot.child("questionNumber").getValue(Long.class);
-                    Long timer = dataSnapshot.child("timer").getValue(Long.class);
-
-                    // Actualizar la interfaz de usuario o realizar alguna acción
-                    updateUI(code, questionNumber, timer);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Manejar errores
-                Log.w("RoomActivity", "loadRoom:onCancelled", databaseError.toException());
-            }
-        });
-    }*/

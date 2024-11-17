@@ -25,7 +25,6 @@
         android:id="@+id/topContainer"
         android:layout_width="311dp"
         android:layout_height="wrap_content"
-        android:paddingTop="15dp"
         app:layout_constraintBottom_toTopOf="@id/supportView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

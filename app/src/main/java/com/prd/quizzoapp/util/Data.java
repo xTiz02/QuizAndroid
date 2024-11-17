@@ -96,12 +96,12 @@ public class Data {
 
     public static ArrayList<UserResult> getUserResults() {
         return new ArrayList<>(List.of(
-                new UserResult("1", 100, "user1", R.drawable.profile_pic,5 ,0,10.5,true),
-                new UserResult("2", 90, "user2", R.drawable.profile_pic,4 ,1,10.5,true),
-                new UserResult("3", 80, "user3", R.drawable.profile_pic,3 ,2,10.5,true),
-                new UserResult("4", 70, "user4", R.drawable.profile_pic,2 ,3,10.5,true),
-                new UserResult("5", 60, "user5", R.drawable.profile_pic,1 ,4,10.5,true),
-                new UserResult("6", 50, "user6", R.drawable.profile_pic,0 ,5,10.5,false)));
+                new UserResult("1", 100, "user1",Util.default_img,5 ,0,10.5,true),
+                new UserResult("2", 90, "user2", Util.default_img,4 ,1,10.5,true),
+                new UserResult("3", 80, "user3", Util.default_img,3 ,2,10.5,true),
+                new UserResult("4", 70, "user4", Util.default_img,2 ,3,10.5,true),
+                new UserResult("5", 60, "user5", Util.default_img,1 ,4,10.5,true),
+                new UserResult("6", 50, "user6", Util.default_img,0 ,5,10.5,false)));
     }
 
 

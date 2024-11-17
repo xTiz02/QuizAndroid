@@ -62,6 +62,17 @@ public class Util {
         });
     }
 
+    public static void delay(String message,Context context,Runnable run){
+        new Handler(Looper.getMainLooper()).post(() -> {
+            LoadingService loadingService = new LoadingService(context);
+            loadingService.showLoading(message);
+
+            run.run();
+
+            loadingService.hideLoading();
+        });
+    }
+
 
 }
 

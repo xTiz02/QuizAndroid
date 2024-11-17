@@ -27,9 +27,11 @@ import com.prd.quizzoapp.databinding.FragmentRoomBinding;
 import com.prd.quizzoapp.model.dto.QuizRequestDto;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.RoomConfig;
+import com.prd.quizzoapp.model.entity.UserResult;
 import com.prd.quizzoapp.model.entity.UserRoom;
 import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.model.service.QuizServerImpl;
+import com.prd.quizzoapp.model.service.ResultService;
 import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.model.service.SseManager;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
@@ -53,8 +55,10 @@ public class RoomFragment extends Fragment {
     private String idRoom;
     private boolean isAdmin = false;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private final FirebaseDatabase db = FirebaseDatabase.getInstance();
+    private FirebaseDatabase db =  FirebaseDatabase.getInstance();
     private QuizRequestDto quizRequestDto;
+    private ResultService resultService;
+
 
     public RoomFragment() {
         // Required empty public constructor
@@ -79,8 +83,10 @@ public class RoomFragment extends Fragment {
         idRoom = DataSharedPreference.getData(Util.ROOM_UUID_KEY, getContext());
         qs = new QuizServerImpl();
         rS = new RoomService(getContext());
+        resultService = new ResultService(getContext());
         DatabaseReference dbRoomRef = db.getReference("rooms").child(idRoom);
-        userAdapter = new UserAdapter(new ArrayList<>());
+        DatabaseReference dbResults = db.getReference("results").child(idRoom).child("users");
+        userAdapter = new UserAdapter(new ArrayList<>(), getContext());
         ls = new LoadingService(getContext());
         binding.rvUsers.setHasFixedSize(true);
         binding.rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -122,7 +128,73 @@ public class RoomFragment extends Fragment {
             qs.generateQuestions(quizRequestDto,idRoom, new ActionCallback() {
                 @Override
                 public void onSuccess() {
-                    ls.hideLoading();
+                    ArrayList<UserRoom> usersInRoom = userAdapter.getUsers();
+                    dbResults.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists()){
+                                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                    UserResult user = userSnapshot.getValue(UserResult.class);
+                                    if(usersInRoom.stream().noneMatch(userRoom -> userRoom.getUUID().equals(user.getUserUuid()))){
+                                        resultService.deleteUserResult(idRoom, user.getUserUuid(), new ActionCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Util.showLog("RoomFragment", "Resultados de usuario inactivo eliminados: " + user.getUserUuid());
+                                            }
+
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                Util.showLog("RoomFragment", "Error al eliminar resultados de usuario: " + user.getUserUuid());
+                                            }
+                                        });
+                                    }
+                                }
+                                ArrayList<UserRoom> usersPlaying = userAdapter.getUsers().stream()
+                                        .filter(userRoom -> userRoom.isPlaying())
+                                        .collect(Collectors.toCollection(ArrayList::new));
+                                if(!usersPlaying.isEmpty()){
+                                    Util.showLog("RoomFragment", "Usuarios inactivos: "+usersPlaying);
+                                    for (UserRoom user : usersPlaying) {
+                                        resultService.deleteUserResult(idRoom, user.getUUID(), new ActionCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Util.showLog("RoomFragment", "Resultados de usuario inactivo eliminados" + user.getUUID());
+                                            }
+
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                Util.showLog("RoomFragment", "Error al eliminar resultados de usuario:" + user.getUUID());
+                                            }
+                                        });
+                                    }
+                                }else {
+                                    Util.showLog("RoomFragment", "No hay usuarios inactivos");
+                                }
+                                ls.hideLoading();
+                            }else {
+                                Util.showLog("RoomFragment", "No hay resultados de usuarios");
+                                ls.hideLoading();
+                            }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                           /* resultService.deleteAllUserResults(idRoom, new ActionCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Util.showLog("RoomFragment", "Resultados de usuarios eliminados");
+                                    ls.hideLoading();
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Util.showLog("RoomFragment", "Error al eliminar resultados de usuarios");
+                                    ls.hideLoading();
+                                }
+                            });*/
+                            Util.showLog("RoomFragment", "Error al obtener resultados de usuarios");
+                            ls.hideLoading();
+                        }
+                    });
                 }
 
                 @Override
@@ -132,21 +204,6 @@ public class RoomFragment extends Fragment {
                 }
             });
         });
-
-        //Conectar al servidor de eventos
-        /*qs.connectToSseServer(idRoom, new DataActionCallback<String>() {
-            @Override
-            public void onSuccess(String data) {
-                receive = data;
-                System.out.println("Data recibida en el activity: "+receive);
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-            }
-        });*/
-
-
 
         //Obtener conf de la sala
         dbRoomRef.child("settings").addValueEventListener(new ValueEventListener() {
@@ -174,7 +231,10 @@ public class RoomFragment extends Fragment {
                                     .collect(Collectors.toCollection(ArrayList::new)),
                             room.getSubCategories());
                 }else {
-                    DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
+                    if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, getContext()) != null){
+                        DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
+                        navToHome();
+                    }
                     navToHome();
                     Toast.makeText(getContext(), "La sala en la que estabas ya no existe", Toast.LENGTH_LONG).show();
                 }
@@ -182,10 +242,9 @@ public class RoomFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Error al obtener la sala", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error al obtener la sala", Toast.LENGTH_LONG).show();
             }
         });
-        //Conectar al servidor de eventos
         //Obtener los usuarios de la sala
         dbRoomRef.child("usersRoom").orderByChild("admin").addChildEventListener(new ChildEventListener() {
             @Override
@@ -220,6 +279,27 @@ public class RoomFragment extends Fragment {
             }
         });
 
+        //Cambiar estado de isPlaying a false
+        dbRoomRef.child("usersRoom").child(auth.getUid().toString()).child("playing").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                   boolean isPlaying = snapshot.getValue(Boolean.class);
+                     if(isPlaying) {
+                         rS.changePlayingState(
+                                    idRoom,
+                                    auth.getUid().toString(),
+                                    false
+                         );
+                     }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Error al obtener el estado del jugador", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void navToHome(){

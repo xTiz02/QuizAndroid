@@ -3,6 +3,7 @@ package com.prd.quizzoapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -21,7 +22,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.databinding.ActivityMainBinding;
 import com.prd.quizzoapp.model.dto.QuestionsListDto;
+import com.prd.quizzoapp.model.service.ResultService;
+import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.model.service.SseManager;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 import com.prd.quizzoapp.views.quiz.QuizActivity;
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     private DatabaseReference dbRef;
     private NavController navController;
     private FirebaseAuth auth;
+    private RoomService roomService;
+    private ResultService resultService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         setContentView(binding.getRoot());
         initNavigation();
         SseManager.getInstance().addListener(this);
+        roomService = new RoomService(this);
+        resultService = new ResultService(this);
          auth = FirebaseAuth.getInstance();
         dbRef = FirebaseDatabase.getInstance().getReference("users");
         dbRef.child(auth.getUid()).addValueEventListener(new ValueEventListener() {
@@ -67,14 +75,29 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     @Override
     public void onMessageReceived(QuestionsListDto questions) {
         //esperar 4 segundos para que el usuario pueda leer el mensaje
-        Util.delay(4000,"La partida va a comenzar ...",this,
-                ()->{//before
-                },
-                () -> {
-                    Intent intent = new Intent(this, QuizActivity.class);
-                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
-                    startActivity(intent);
-                    finish();
+        Util.delay("La partida va a comenzar ...",this,
+                ()->{
+                    resultService.saveUserResult(
+                            DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
+                            new ActionCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    roomService.changePlayingState(
+                                            DataSharedPreference.getData(Util.ROOM_UUID_KEY, MainActivity.this),
+                                            auth.getUid(),
+                                            true);
+                                    Intent intent = new Intent(MainActivity.this, QuizActivity.class);
+                                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
+                                    startActivity(intent);
+                                    finish();
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Toast.makeText(MainActivity.this, "Error al unirte a la partida", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                    );
                 });
     }
     @Override

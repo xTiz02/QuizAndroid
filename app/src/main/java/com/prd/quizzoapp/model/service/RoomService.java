@@ -27,7 +27,6 @@ public class RoomService {
     private final String TAG = "RoomService";
     private FirebaseAuth auth;
     private Context context;
-    private LoadingService ls;
     private UserService us;
     private DatabaseReference dbRef;
     private QuizServerImpl quizServer;
@@ -35,7 +34,6 @@ public class RoomService {
     public RoomService(Context context) {
         auth = FirebaseAuth.getInstance();
         this.context = context;
-        ls = new LoadingService(context);
         us = new UserService(context);
         quizServer = new QuizServerImpl();
         dbRef = FirebaseDatabase.getInstance().getReference("rooms");
@@ -161,5 +159,16 @@ public class RoomService {
                 }
             });
         }
+    }
+
+
+    public void changePlayingState(String roomUuid, String userUuid, boolean isPlaying){
+        dbRef.child(roomUuid).child("usersRoom").child(userUuid).updateChildren(Map.of("playing", isPlaying)).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+
+            }else {
+                Util.showLog(TAG, "Error al cambiar estado de juego");
+            }
+        });
     }
 }
