@@ -8,6 +8,7 @@ import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.prd.quizzoapp.MainActivity;
 import com.prd.quizzoapp.databinding.ActivityLoginBinding;
 import com.prd.quizzoapp.model.service.AccountService;
@@ -18,6 +19,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
     private AccountService accountService;
+    private FirebaseAuth auth;
     private final LoadingService ls = new LoadingService(this);
 
     @Override
@@ -28,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         accountService = new AccountService(this);
-
+        auth = FirebaseAuth.getInstance();
         //Cundo se de click en el botón de login redirigir a la pantalla principal donde se muestra el BottomNavigationView y los fragments
         binding.btnLogin.setOnClickListener(v -> {
             String email = binding.edtEmail.getText().toString().trim();

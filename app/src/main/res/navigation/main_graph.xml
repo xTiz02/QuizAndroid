@@ -34,11 +34,7 @@
         android:name="com.prd.quizzoapp.views.acc.ProfileFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_profile" />
-    <activity
-        android:id="@+id/mainActivity"
-        android:name="com.prd.quizzoapp.MainActivity"
-        android:label="activity_main"
-        tools:layout="@layout/activity_main" />
+
     <fragment
         android:id="@+id/roomFragment"
         android:name="com.prd.quizzoapp.views.room.RoomFragment"
@@ -68,8 +64,5 @@
         android:name="com.prd.quizzoapp.views.acc.RegisterActivity"
         android:label="activity_register"
         tools:layout="@layout/activity_register" />
-    <activity
-        android:id="@+id/loginActivity"
-        android:name="com.prd.quizzoapp.views.acc.LoginActivity"
-        android:label="LoginActivity" />
+
 </navigation>

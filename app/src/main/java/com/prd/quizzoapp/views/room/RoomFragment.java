@@ -53,7 +53,7 @@ public class RoomFragment extends Fragment {
     private LoadingService ls;
     private QuizServerService qs;
     private String idRoom;
-    private boolean isAdmin = false;
+    private boolean isAdmin;
     private final FirebaseAuth auth = FirebaseAuth.getInstance();
     private FirebaseDatabase db =  FirebaseDatabase.getInstance();
     private QuizRequestDto quizRequestDto;
@@ -81,6 +81,7 @@ public class RoomFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         binding = FragmentRoomBinding.bind(view);
         idRoom = DataSharedPreference.getData(Util.ROOM_UUID_KEY, getContext());
+        isAdmin = DataSharedPreference.getBooleanData(Util.IS_ADMIN_KEY, getContext());
         qs = new QuizServerImpl();
         rS = new RoomService(getContext());
         resultService = new ResultService(getContext());
@@ -215,13 +216,11 @@ public class RoomFragment extends Fragment {
                     Room room = snapshot.getValue(Room.class);
                     RoomConfig roomConfig = room.getRoomConfig();
                     binding.tvCode.setText(roomConfig.getCode());
-                    if(auth.getUid().toString().equals(roomConfig.getUuidAdmin())){
-                        isAdmin = true;
+                    if(isAdmin){
                         binding.btnStartGame.setVisibility(View.VISIBLE);
                         binding.btnLeaveRoom.setVisibility(View.VISIBLE);
                         binding.roomConfig.setVisibility(View.VISIBLE);
                     }else{
-                        isAdmin = false;
                         binding.btnLeaveRoom.setVisibility(View.VISIBLE);
                     }
                     quizRequestDto = new QuizRequestDto(
@@ -233,16 +232,17 @@ public class RoomFragment extends Fragment {
                 }else {
                     if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, getContext()) != null){
                         DataSharedPreference.removeData(Util.ROOM_UUID_KEY, getContext());
+                        DataSharedPreference.removeData(Util.IS_ADMIN_KEY, getContext());
                         navToHome();
                     }
                     navToHome();
-                    Toast.makeText(getContext(), "La sala en la que estabas ya no existe", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "La sala ya no existe", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Error al obtener la sala", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Error al obtener la sala", Toast.LENGTH_LONG).show();
             }
         });
         //Obtener los usuarios de la sala

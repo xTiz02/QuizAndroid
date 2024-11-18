@@ -105,4 +105,14 @@ public class LoadingService {
                 .create();
         alertDialog.show();
     }
+
+    public void signOutDialog(Runnable action) {
+        alertDialog = new AlertDialog.Builder(context)
+                .setTitle("¿Estás seguro de que deseas cerrar sesión?")
+                .setPositiveButton("Cerrar sesión", (dialog, which) -> {
+                    action.run();
+                }).setCancelable(true)
+                .create();
+        alertDialog.show();
+    }
 }

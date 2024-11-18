@@ -22,12 +22,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.prd.quizzoapp.databinding.ActivityMainBinding;
 import com.prd.quizzoapp.model.dto.QuestionsListDto;
+import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.model.service.ResultService;
 import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.model.service.SseManager;
+import com.prd.quizzoapp.model.service.UserService;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
+import com.prd.quizzoapp.views.acc.LoginActivity;
 import com.prd.quizzoapp.views.quiz.QuizActivity;
 import com.squareup.picasso.Picasso;
 
@@ -39,9 +42,14 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     private ActivityMainBinding binding;
     private DatabaseReference dbRef;
     private NavController navController;
-    private FirebaseAuth auth;
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+    private final String idUser = auth.getUid();
     private RoomService roomService;
     private ResultService resultService;
+    private UserService userService;
+    private LoadingService loadingService;
+    private ValueEventListener valueUserListener;
+    private boolean logout = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,12 +58,55 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initNavigation();
+        loadingService = new LoadingService(this);
         SseManager.getInstance().addListener(this);
         roomService = new RoomService(this);
         resultService = new ResultService(this);
-         auth = FirebaseAuth.getInstance();
+        userService = new UserService(this);
+         binding.ivLogout.setOnClickListener(v -> {
+             loadingService.signOutDialog(()->{
+
+                 if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null) {
+                     boolean isAdmin = DataSharedPreference.getBooleanData(Util.IS_ADMIN_KEY, this);
+                     roomService.deleteRoom(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
+                             idUser,
+                             isAdmin,
+                             new ActionCallback() {
+                                 @Override
+                                 public void onSuccess() {
+                                     logout = true;
+                                     dbRef.removeEventListener(valueUserListener);
+                                     DataSharedPreference.removeData(Util.ROOM_UUID_KEY, MainActivity.this);
+                                     DataSharedPreference.removeData(Util.IS_ADMIN_KEY, MainActivity.this);
+                                     auth.signOut();
+                                    Intent intent1 = new Intent(MainActivity.this, LoginActivity.class);
+                                    startActivity(intent1);
+                                    finish();
+
+
+                                 }
+
+                                 @Override
+                                 public void onFailure(Exception e) {
+                                     Toast.makeText(MainActivity.this, "Error al salir de la app", Toast.LENGTH_SHORT).show();
+                                 }
+                             });
+                 }else {
+                     logout = true;
+                     dbRef.removeEventListener(valueUserListener);
+
+                    //cerrar todas las actividades y fragmentos
+                     auth.signOut();
+                     Intent intent2 = new Intent(MainActivity.this, LoginActivity.class);
+                     startActivity(intent2);
+                     finish();
+                    //eliminar la navegación de la pila de retroceso
+                 }
+             });
+         });
+
         dbRef = FirebaseDatabase.getInstance().getReference("users");
-        dbRef.child(auth.getUid()).addValueEventListener(new ValueEventListener() {
+        valueUserListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
@@ -68,9 +119,12 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Util.showLog(TAG, "Error al obtener la sala del usuario");
+                Util.showLog(TAG, "Error al obtener los datos del usuario");
             }
-        });
+        };
+        dbRef.child(idUser).addValueEventListener(valueUserListener);
+
+
     }
     @Override
     public void onMessageReceived(QuestionsListDto questions) {
@@ -84,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                                 public void onSuccess() {
                                     roomService.changePlayingState(
                                             DataSharedPreference.getData(Util.ROOM_UUID_KEY, MainActivity.this),
-                                            auth.getUid(),
+                                            idUser,
                                             true);
                                     Intent intent = new Intent(MainActivity.this, QuizActivity.class);
                                     intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
@@ -103,14 +157,18 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     @Override
     public void onConnectionError(Throwable t) {
         //DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
-        Util.delay(3000,"Error al conectar con la sala",this,
-                ()->{//before
-                },
-                () -> {
-                    NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
-                    navController.navigate(R.id.homeFragment);
-                    Util.showLog(TAG,"Error en la conexión escuchando en main:"+ t.getMessage());
-                });
+        if (!logout) {
+            Util.delay(3000, "Error al conectar con la sala", this,
+                    () -> {//before
+                    },
+                    () -> {
+
+                        NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
+                        navController.navigate(R.id.homeFragment);
+                        Util.showLog(TAG, "Error en la conexión escuchando en main:" + t.getMessage());
+
+                    });
+        }
     }
     @Override
     public void onClosed() {
@@ -118,6 +176,7 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
             Util.delay(4000,"La sala ya no está disponible",this,
                     ()->{
                         DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
+                        DataSharedPreference.removeData(Util.IS_ADMIN_KEY, this);
                     },
                     () -> {
                         NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
@@ -129,8 +188,9 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SseManager.getInstance().removeListener(this);
         SseManager.getInstance().disconnect();
+        SseManager.getInstance().removeListener(this);
+
     }
 
     private void initNavigation(){

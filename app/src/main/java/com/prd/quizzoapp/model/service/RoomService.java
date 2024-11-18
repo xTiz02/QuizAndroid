@@ -50,6 +50,7 @@ public class RoomService {
                     @Override
                     public void onSuccess() {
                         DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomUUID, context);
+                        DataSharedPreference.saveBooleanData(Util.IS_ADMIN_KEY , true, context);
                         callback.onSuccess();
                     }
                     @Override
@@ -105,6 +106,7 @@ public class RoomService {
                         us.saveUserRoom(roomConfig.getUuid(), auth.getUid(), false, new ActionCallback() {
                             @Override
                             public void onSuccess() {
+                                DataSharedPreference.saveBooleanData(Util.IS_ADMIN_KEY , false, context);
                                 callback.onSuccess(roomConfig);
                             }
 
@@ -136,6 +138,7 @@ public class RoomService {
                         @Override
                         public void onSuccess() {
                             DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
+                            DataSharedPreference.removeData(Util.IS_ADMIN_KEY, context);
                             callback.onSuccess();
                         }
 
@@ -153,6 +156,7 @@ public class RoomService {
                 if(task.isSuccessful()){
                     SseManager.getInstance().disconnect();
                     DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
+                    DataSharedPreference.removeData(Util.IS_ADMIN_KEY, context);
                     callback.onSuccess();
                 }else {
                     callback.onFailure(task.getException());

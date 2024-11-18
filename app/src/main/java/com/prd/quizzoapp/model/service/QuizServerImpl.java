@@ -27,7 +27,7 @@ public class QuizServerImpl implements QuizServerService {
 
     public QuizServerImpl() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8085/")
+                .baseUrl("https://quizback-590131019426.us-central1.run.app/")
                 .client(new OkHttpClient.Builder()
                         .connectTimeout(30, TimeUnit.SECONDS)
                         .readTimeout(30, TimeUnit.SECONDS)

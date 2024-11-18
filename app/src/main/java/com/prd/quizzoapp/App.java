@@ -2,6 +2,7 @@ package com.prd.quizzoapp;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,9 +21,15 @@ public class App extends Application {
         super.onCreate();
         roomService = new RoomService(this);
         auth = FirebaseAuth.getInstance();
+        if(auth.getUid() !=null){
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            }
 
             @Override
             public void onActivityStarted(Activity activity) {

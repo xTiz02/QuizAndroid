@@ -50,7 +50,7 @@ public class SseManager {
         }
 
         Request request = new Request.Builder()
-                .url("http://10.0.2.2:8085/sse/" + roomUUID + "/stream")
+                .url("https://quizback-590131019426.us-central1.run.app/sse/" + roomUUID + "/stream")
                 .header("Accept", "application/json; q=0.5")
                 .addHeader("Accept", "text/event-stream")
                 .build();
