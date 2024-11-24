@@ -20,6 +20,7 @@ import com.prd.quizzoapp.databinding.FragmentCreateRoomBinding;
 import com.prd.quizzoapp.model.entity.Category;
 import com.prd.quizzoapp.model.entity.Room;
 import com.prd.quizzoapp.model.entity.SubCategory;
+import com.prd.quizzoapp.model.service.ResultService;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.model.service.LoadingService;
@@ -51,6 +52,7 @@ public class CreateRoomFragment extends Fragment {
     private String idRoom;
     private LoadingService ls;
     private Room currentRoom;
+    private ResultService resultService;
 
 
     public CreateRoomFragment() {
@@ -77,9 +79,9 @@ public class CreateRoomFragment extends Fragment {
         binding = FragmentCreateRoomBinding.bind(view);
         ls = new LoadingService(getContext());
         roomService = new RoomService(getContext());
+        resultService = new ResultService(getContext());
         //si hay argumentos
         args = CreateRoomFragmentArgs.fromBundle(requireArguments());
-
         binding.btnCopy.setOnClickListener(v -> {
             String roomCode = binding.tvCode.getText().toString();
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -242,11 +244,21 @@ public class CreateRoomFragment extends Fragment {
                 new ActionCallback() {
                     @Override
                     public void onSuccess() {
-                        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
-                        navController.navigate(R.id.roomFragment);
-                        ls.hideLoading();
+                        resultService.saveUserResult(
+                                DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext()),
+                                new ActionCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                                        navController.navigate(R.id.roomFragment);
+                                        ls.hideLoading();
+                                    }
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        ls.hideLoading();
+                                    }
+                                });
                     }
-
                     @Override
                     public void onFailure(Exception e) {
                         ls.hideLoading();

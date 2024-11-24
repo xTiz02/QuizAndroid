@@ -2,7 +2,9 @@ package com.prd.quizzoapp.model.entity;
 
 import com.prd.quizzoapp.util.CategoryEnum;
 
-public class Category {
+import java.io.Serializable;
+
+public class Category implements Serializable {
     private CategoryEnum category;
     private int img;
     private boolean selected;

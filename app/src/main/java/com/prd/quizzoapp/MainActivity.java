@@ -30,7 +30,6 @@ import com.prd.quizzoapp.model.service.UserService;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
-import com.prd.quizzoapp.views.acc.LoginActivity;
 import com.prd.quizzoapp.views.quiz.QuizActivity;
 import com.squareup.picasso.Picasso;
 
@@ -50,22 +49,21 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     private LoadingService loadingService;
     private ValueEventListener valueUserListener;
     private boolean logout = false;
+    private boolean gameStart = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Util.showLog(TAG, "onCreate");
         EdgeToEdge.enable(this);
         //hideSystemUI();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        initNavigation();
-        loadingService = new LoadingService(this);
-        SseManager.getInstance().addListener(this);
-        roomService = new RoomService(this);
-        resultService = new ResultService(this);
-        userService = new UserService(this);
-         binding.ivLogout.setOnClickListener(v -> {
+        initServices();
+        /*binding.ivLogout.setOnClickListener(v -> {
              loadingService.signOutDialog(()->{
-
+                 logout = true;
+                 dbRef.removeEventListener(valueUserListener);
+                Util.showLog(TAG, "Saliendo de la app");
                  if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null) {
                      boolean isAdmin = DataSharedPreference.getBooleanData(Util.IS_ADMIN_KEY, this);
                      roomService.deleteRoom(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
@@ -74,15 +72,12 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                              new ActionCallback() {
                                  @Override
                                  public void onSuccess() {
+
+                                     Util.showLog(TAG, "Sala eliminada");
                                      logout = true;
-                                     dbRef.removeEventListener(valueUserListener);
+
                                      DataSharedPreference.removeData(Util.ROOM_UUID_KEY, MainActivity.this);
                                      DataSharedPreference.removeData(Util.IS_ADMIN_KEY, MainActivity.this);
-                                     auth.signOut();
-                                    Intent intent1 = new Intent(MainActivity.this, LoginActivity.class);
-                                    startActivity(intent1);
-                                    finish();
-
 
                                  }
 
@@ -92,37 +87,29 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                                  }
                              });
                  }else {
+
+                     Util.showLog(TAG, "Saliendo de la app sin la sala");
                      logout = true;
-                     dbRef.removeEventListener(valueUserListener);
 
                     //cerrar todas las actividades y fragmentos
-                     auth.signOut();
-                     Intent intent2 = new Intent(MainActivity.this, LoginActivity.class);
-                     startActivity(intent2);
-                     finish();
                     //eliminar la navegación de la pila de retroceso
                  }
-             });
-         });
+                 FirebaseAuth.getInstance().signOut();
+                 Util.showLog(TAG, "Redirigiendo a la pantalla de inicio de sesión");
+                 //cerrar la app
+                 NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                         .findFragmentById(R.id.fragmentContainerView);
+                 if (navHostFragment != null) {
+                     NavController navController = navHostFragment.getNavController();
 
-        dbRef = FirebaseDatabase.getInstance().getReference("users");
-        valueUserListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    System.out.println("snapshot: "+snapshot);
-                    binding.tvUserName.setText(snapshot.child("username").getValue().toString());
-                    Picasso.get().load(snapshot.child("img").getValue().toString()).into(binding.mainProfileImage);
-                }else {
-                    binding.tvUserName.setText("loading...");
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Util.showLog(TAG, "Error al obtener los datos del usuario");
-            }
-        };
-        dbRef.child(idUser).addValueEventListener(valueUserListener);
+
+                     navController.popBackStack(R.id.main_graph, true); // Reemplaza 'nav_graph' con el ID de tu gráfico raíz
+                 }
+             });
+         });*/
+
+
+
 
 
     }
@@ -131,52 +118,49 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         //esperar 4 segundos para que el usuario pueda leer el mensaje
         Util.delay("La partida va a comenzar ...",this,
                 ()->{
-                    resultService.saveUserResult(
-                            DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
-                            new ActionCallback() {
-                                @Override
-                                public void onSuccess() {
-                                    roomService.changePlayingState(
-                                            DataSharedPreference.getData(Util.ROOM_UUID_KEY, MainActivity.this),
-                                            idUser,
-                                            true);
-                                    Intent intent = new Intent(MainActivity.this, QuizActivity.class);
-                                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
-                                    startActivity(intent);
-                                    finish();
-                                }
-
-                                @Override
-                                public void onFailure(Exception e) {
-                                    Toast.makeText(MainActivity.this, "Error al unirte a la partida", Toast.LENGTH_LONG).show();
-                                }
-                            }
-                    );
+                    gameStart = true;
+                    Util.showLog(TAG, "La partida va a comenzar ...");
+                    Intent intent = new Intent(MainActivity.this, QuizActivity.class);
+                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
+                    startActivity(intent);
+                    finishAffinity();
                 });
     }
     @Override
     public void onConnectionError(Throwable t) {
         //DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
-        if (!logout) {
-            Util.delay(3000, "Error al conectar con la sala", this,
+        if (!logout && !gameStart) {
+            Util.delay(2000, "Error al conectar con la sala", this,
                     () -> {//before
                     },
                     () -> {
 
                         NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
                         navController.navigate(R.id.homeFragment);
-                        Util.showLog(TAG, "Error en la conexión escuchando en main:" + t.getMessage());
+                        Util.showLog(TAG, "Error en la conexión escuchando en main");
 
                     });
         }
     }
     @Override
     public void onClosed() {
-        if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null) {
+        if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null && !logout) {
             Util.delay(4000,"La sala ya no está disponible",this,
                     ()->{
-                        DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
-                        DataSharedPreference.removeData(Util.IS_ADMIN_KEY, this);
+                    roomService.deleteRoom(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
+                            idUser,
+                            DataSharedPreference.getBooleanData(Util.IS_ADMIN_KEY, this),
+                            new ActionCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    DataSharedPreference.clearData(MainActivity.this);
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Toast.makeText(MainActivity.this, "Error al cerrar la sala", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                     },
                     () -> {
                         NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
@@ -185,12 +169,79 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                     });
         }
     }
+
+
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Util.showLog(TAG, "onStart");
+        initListener();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Util.showLog(TAG, "onResume");
+        initListener(); // Inicia el listener cuando la actividad está activa.
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Util.showLog(TAG, "onPause");
+        removeListener(); // Detiene el listener cuando la actividad está en pausa.
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SseManager.getInstance().disconnect();
-        SseManager.getInstance().removeListener(this);
+        removeListener();
+        if(DataSharedPreference.containsData(Util.ROOM_UUID_KEY, this)) {
+            SseManager.getInstance().removeListener(this);
+            SseManager.getInstance().disconnect();
+        }
+    }
 
+    public void initListener(){
+        if(valueUserListener==null){
+            valueUserListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        Util.showLog(TAG, "Usuario obtenido 2");
+                        binding.tvUserName.setText(snapshot.child("username").getValue().toString());
+                        Picasso.get().load(snapshot.child("img").getValue().toString()).into(binding.mainProfileImage);
+                    }else {
+                        binding.tvUserName.setText("loading...");
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Util.showLog(TAG, "Error al obtener los datos del usuario");
+                }
+            };
+            dbRef.addValueEventListener(valueUserListener);
+        }
+    }
+
+    public void removeListener(){
+        if(valueUserListener!=null){
+            dbRef.removeEventListener(valueUserListener);
+            valueUserListener = null;
+        }
+    }
+
+    public void initServices(){
+        initNavigation();
+        dbRef = FirebaseDatabase.getInstance().getReference("users").child(idUser);
+        loadingService = new LoadingService(this);
+        roomService = new RoomService(this);
+        resultService = new ResultService(this);
+        userService = new UserService(this);
+        SseManager.getInstance().addListener(this);
     }
 
     private void initNavigation(){

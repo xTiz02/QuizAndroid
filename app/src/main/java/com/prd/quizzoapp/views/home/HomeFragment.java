@@ -21,7 +21,9 @@ import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentHomeBinding;
 import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.service.LoadingService;
+import com.prd.quizzoapp.model.service.ResultService;
 import com.prd.quizzoapp.model.service.RoomService;
+import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.util.Data;
 import com.prd.quizzoapp.util.DataSharedPreference;
@@ -36,6 +38,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private LoadingService ls;
     private RoomService rs;
+    private ResultService resultService;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -59,6 +62,7 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.bind(view);
         ls = new LoadingService(requireContext());
         rs = new RoomService(requireContext());
+        resultService = new ResultService(requireContext());
         categoryAdapter = new CategoryAdapter(Data.getCategories(),
                 requireContext(),
                 DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext())!=null? () -> {}:checkButtonRoom());
@@ -113,6 +117,20 @@ public class HomeFragment extends Fragment {
                             @Override
                             public void onSuccess(RoomConfig data) {
                                 System.out.println("RoomConfig: "+data);
+                                resultService.saveUserResult(
+                                        DataSharedPreference.getData(Util.ROOM_UUID_KEY, requireContext()),
+                                        new ActionCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
+                                                navController.navigate(R.id.roomFragment);
+                                                ls.hideLoading();
+                                            }
+                                            @Override
+                                            public void onFailure(Exception e) {
+                                                ls.hideLoading();
+                                            }
+                                        });
                                 NavController navController = Navigation.findNavController(requireActivity(), R.id.fragmentContainerView);
                                 navController.navigate(R.id.roomFragment);
                                 dialog.dismiss();

@@ -68,13 +68,12 @@ public class LoginActivity extends AppCompatActivity {
         binding.tvRegister.setOnClickListener(v -> {
             Intent intent = new Intent(this, RegisterActivity.class);
             startActivity(intent);
-            finish();
         });
 
         binding.llGoogle.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
+            /*Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-            finish();
+            finish();*/
         });
     }
 

@@ -70,19 +70,20 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-    <androidx.appcompat.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ver"
+        android:src="@drawable/format_list_numbered_rtl_24px"
+        android:tint="@color/white"
         android:background="@drawable/rounded_box"
-        android:textColor="@color/dark_gray_4"
+        android:gravity="center"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
         android:fontFamily="@font/roboto_bold"
-        android:textSize="16sp"
-        android:visibility="gone"
         android:layout_marginStart="16dp"
-        android:layout_weight="0.2"
+        android:layout_weight="0.1"
         android:layout_gravity="end|center"
-        android:id="@+id/btnShare"/>
+        android:id="@+id/btnResults"/>
     </LinearLayout>
 
 
@@ -162,7 +163,7 @@
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddCategory"
+        android:id="@+id/btnChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/chat_24px"

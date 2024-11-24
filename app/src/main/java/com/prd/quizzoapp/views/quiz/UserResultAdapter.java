@@ -23,6 +23,11 @@ public class UserResultAdapter extends RecyclerView.Adapter<UserResultViewHolder
         this.context = context;
     }
 
+    public void clear() {
+        users.clear();
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public UserResultViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

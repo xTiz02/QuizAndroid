@@ -37,4 +37,16 @@ public class DataSharedPreference {
         editor.remove(key);
         editor.apply();
     }
+
+    public static void clearData(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
+
+    public static boolean containsData(String key, Context context) {//si el dato existe en el shared preference
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.contains(key);
+    }
 }

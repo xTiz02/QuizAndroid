@@ -79,7 +79,7 @@
                 android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:textSize="18sp"
-                tools:text="Name" />
+                tools:text="----" />
 
             <TextView
                 android:id="@+id/tvRank2Score"
@@ -88,7 +88,7 @@
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                tools:text="123.4" />
+                tools:text="----" />
 
         </LinearLayout>
 
@@ -143,7 +143,7 @@
                 android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:textSize="20sp"
-                tools:text="Name" />
+                tools:text="----" />
 
             <TextView
                 android:id="@+id/tvRank1Score"
@@ -152,7 +152,7 @@
                 android:gravity="center"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="123.4" />
+                tools:text="----" />
 
         </LinearLayout>
 
@@ -206,7 +206,7 @@
                 android:layout_marginTop="2dp"
                 android:gravity="center"
                 android:textSize="18sp"
-                tools:text="Name" />
+                tools:text="----" />
 
             <TextView
                 android:id="@+id/tvRank3Score"
@@ -215,7 +215,7 @@
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                tools:text="123.4" />
+                tools:text="----" />
 
         </LinearLayout>
 

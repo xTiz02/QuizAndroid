@@ -21,10 +21,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.FragmentProfileBinding;
 import com.prd.quizzoapp.model.entity.User;
-import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 import com.squareup.picasso.Picasso;
@@ -37,47 +35,33 @@ public class ProfileFragment extends Fragment {
 
     private DatabaseReference dbRef,dbRoomRef;
     private FragmentProfileBinding binding;
-    private LoadingService ls;
     private FirebaseStorage storage;
     private FirebaseAuth auth;
     private User user;
     private Uri setImageUri;
+    private ValueEventListener eventListener;
     public ProfileFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {//1
         super.onCreate(savedInstanceState);
+        initServices();
+        Util.showLog("ProfileFragment", "onCreate");
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onStart() {//3
+        super.onStart();
+        //initListener();
+        Util.showLog("ProfileFragment", "onStart");
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {//2
         super.onViewCreated(view, savedInstanceState);
-        binding = FragmentProfileBinding.bind(view);
-        auth = FirebaseAuth.getInstance();
-        ls = new LoadingService(getContext());
-        storage = FirebaseStorage.getInstance();
-        dbRef = FirebaseDatabase.getInstance().getReference("users");
-        dbRef.child(auth.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    user = snapshot.getValue(User.class);
-                    binding.edtUsername.setText(user.getUsername());
-                    binding.tvEmailId.setText(user.getEmail());
-                    binding.edtDescp.setText(user.getDescription());
-                    Picasso.get().load(user.getImg()).into(binding.userProfilePic);
-                }else {
-                    Toast.makeText(getContext(), "Error al obtener el usuario", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Util.showLog("ProfileFragment", "Error al obtener el usuario");
-                Toast.makeText(getContext(), "Error al obtener el usuario", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Util.showLog("ProfileFragment", "onViewCreated");
 
         binding.userProfilePic.setOnClickListener(v->{
             Intent intent = new Intent();
@@ -168,7 +152,8 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        binding = FragmentProfileBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -181,4 +166,81 @@ public class ProfileFragment extends Fragment {
             }
         }
     }
+
+    @Override
+    public void onDestroyView() {//3s
+        super.onDestroyView();
+        /*removeListener();
+        binding = null;*/
+        Util.showLog("ProfileFragment", "onDestroyView");
+    }
+
+   /* @Override
+    public void onStop() {//2s
+        super.onStop();
+        removeListener();
+        Util.showLog("ProfileFragment", "onStop");
+    }*/
+
+    @Override
+    public void onResume() {//se llama cuando el fragmento se vuelve visible para el usuario 4
+        super.onResume();
+        /*if (isAdded() && binding != null) {//isAdded() Devuelve true si el fragmento está actualmente asociado a su actividad y visible al usuario.
+            initListener(); // Vuelve a agregar el listener cuando el fragmento vuelve a ser visible
+        }*/
+        initListener();
+        Util.showLog("ProfileFragment", "onResume");
+    }
+
+    @Override
+    public void onPause() {//1s
+        super.onPause();
+        removeListener();
+        Util.showLog("ProfileFragment", "onPause");
+    }
+
+
+    public void initListener() {
+        if(eventListener==null){
+            Util.showLog("ProfileFragment", "Se agrego el listener");
+            eventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    user = snapshot.getValue(User.class);
+                    if(user!=null){
+                        Util.showLog("ProfileFragment", "Usuario obtenido");
+                        binding.edtUsername.setText(user.getUsername());
+                        binding.edtDescp.setText(user.getDescription());
+                        if(user.getImg()!=null){
+                            Picasso.get().load(user.getImg()).into(binding.userProfilePic);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Util.showLog("ProfileFragment", "Error al obtener usuario");
+                }
+            };
+            dbRef = FirebaseDatabase.getInstance().getReference("users").child(auth.getUid());
+            dbRoomRef = FirebaseDatabase.getInstance().getReference("rooms");
+            dbRef.addValueEventListener(eventListener);
+        }
+    }
+
+    public void initServices() {
+        storage = FirebaseStorage.getInstance();
+        auth = FirebaseAuth.getInstance();
+    }
+
+    public void removeListener() {
+        if(eventListener!=null){
+            Util.showLog("ProfileFragment", "Se removio el listener");
+            dbRef.removeEventListener(eventListener);
+            eventListener = null;
+        }
+    }
+
+
+
 }

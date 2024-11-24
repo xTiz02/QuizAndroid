@@ -60,7 +60,10 @@ public class ResultService {
         //sumar los scores y añadirlos al map
         scores.stream().forEach(score -> {
             if(scoreMap.containsKey("score")){
-                scoreMap.put("score", (double)scoreMap.get("score")+score.getScore());
+                //redondear a 2 decimales
+                double scoreValue = (double)scoreMap.get("score")+score.getScore();
+                scoreMap.put("score", Math.round(scoreValue * 100.0) / 100.0);
+
             }else {
                 scoreMap.put("score", score.getScore());
             }
@@ -97,6 +100,16 @@ public class ResultService {
                 callback.onSuccess();
             }else {
                 callback.onFailure(new Exception("Error al eliminar userResult en: "+roomUUID));
+            }
+        });
+    }
+
+    public void deleteResult(String roomUUID, ActionCallback callback){
+        dbRef.child(roomUUID).removeValue().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                callback.onSuccess();
+            }else {
+                callback.onFailure(new Exception("Error al eliminar userResults en: "+roomUUID));
             }
         });
     }

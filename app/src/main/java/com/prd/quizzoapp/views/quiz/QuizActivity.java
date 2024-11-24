@@ -1,5 +1,6 @@
 package com.prd.quizzoapp.views.quiz;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -18,9 +19,13 @@ import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.ActivityQuizBinding;
 import com.prd.quizzoapp.model.entity.Question;
 import com.prd.quizzoapp.model.entity.QuestionOption;
+import com.prd.quizzoapp.model.entity.Room;
+import com.prd.quizzoapp.model.entity.RoomConfig;
 import com.prd.quizzoapp.model.entity.Score;
 import com.prd.quizzoapp.model.service.ResultService;
+import com.prd.quizzoapp.model.service.RoomService;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
+import com.prd.quizzoapp.model.service.intf.DataActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 
@@ -36,9 +41,34 @@ public class QuizActivity extends AppCompatActivity {
     private double timeLeft = 0;
     private int position = 0;
     private Question currentQuestion;
-    private ArrayList<Score> scoresList = new ArrayList<>();
+    private final ArrayList<Score> scoresList = new ArrayList<>();
     private double score = 0.0;
     private boolean marketCorrect = false;
+    private RoomService rs;
+    private RoomConfig rc;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        rs = new RoomService(this);
+        rs.getRoomByUuid(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this), new DataActionCallback<Room>() {
+            @Override
+            public void onSuccess(Room data) {
+                rc = data.getRoomConfig();
+                binding.tvTimer.setText(String.valueOf(rc.getTimeOfQuestion()));
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Util.showLog("QuizActivity", "Error al obtener la sala para el quiz");
+            }
+        });
+    }
+    @SuppressLint("MissingSuperCall")//no permitir regresar
+    @Override
+    public void onBackPressed() {
+        //no permitir regresar
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +77,7 @@ public class QuizActivity extends AppCompatActivity {
         binding = ActivityQuizBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         resultService = new ResultService(this);
+
         questions = (ArrayList<Question>) getIntent().getSerializableExtra("questions");
         binding.pbProgress.setMax(questions.size());
         binding.tvProgress.setText("1/" + questions.size());
@@ -77,7 +108,7 @@ public class QuizActivity extends AppCompatActivity {
         Score scoreModel = new Score(
                 currentQuestion.getUuid(),
                 score,
-                20 - timeLeft,
+                rc.getTimeOfQuestion() - timeLeft,
                 marketCorrect
         );
         System.out.println("Score: " + scoreModel);
@@ -126,6 +157,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private void endGame() {
         Toast.makeText(this, "Fin del juego", Toast.LENGTH_SHORT).show();
+        Util.showLog("QuizActivity", "Fin del juego");
         System.out.println("Scores: " + scoresList);
         Intent intent = new Intent(this, LeaderBoardActivity.class);
         startActivity(intent);
@@ -147,7 +179,7 @@ public class QuizActivity extends AppCompatActivity {
         binding.circularProgressBar.setMax(20);
         binding.circularProgressBar.setProgress(20);
 
-        timer = new CountDownTimer(20*1000, 1000) {//el primer valor es el tiempo total y el segundo es el intervalo de tiempo en milisegundos
+        timer = new CountDownTimer(rc.getTimeOfQuestion()* 1000L, 1000) {//el primer valor es el tiempo total y el segundo es el intervalo de tiempo en milisegundos
             @Override
             public void onTick(long millisUntilFinished) {
                 binding.circularProgressBar.incrementProgressBy(-1);
@@ -168,7 +200,7 @@ public class QuizActivity extends AppCompatActivity {
                 Toast.makeText(QuizActivity.this, "Se acabó el tiempo", Toast.LENGTH_SHORT).show();
                 marketCorrect = false;
                 setScore(false);
-                new CountDownTimer(2000, 1000) {
+                new CountDownTimer(4000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                     }
@@ -221,8 +253,24 @@ public class QuizActivity extends AppCompatActivity {
 
     private void setScore(boolean correct) {
         double score1 = correct ? 1.0 : 0.0;
-        double score2 = timeLeft / 20;
+        double score2 = Math.round((timeLeft / rc.getTimeOfQuestion())*100) / 100.0;
         score = score1 + score2;
+        //convertir a string
+        String scoreStr = String.valueOf(score);
+        //crear un numero redondeado
+        String[] parts = scoreStr.split("\\.");
+        if (parts.length > 1) {
+            if (parts[1].length() > 2) {
+                scoreStr = parts[0] + "." + parts[1].substring(0, 2);
+            }
+        }else{
+            scoreStr = parts[0] + ".00";
+        }
+        double scoreFinal = Double.parseDouble(scoreStr);
+        score = scoreFinal;
+        System.out.println("Score: " + score);
+
+
         //enviar resultado a la base de datos
     }
 
@@ -230,7 +278,6 @@ public class QuizActivity extends AppCompatActivity {
         boolean correct = (boolean) btnPressed.getTag();
         if (correct) {
             marketCorrect = true;
-            Toast.makeText(this, "Respuesta correcta", Toast.LENGTH_SHORT).show();
         } else {
             marketCorrect = false;
             for (int i = 0; i < binding.linearLayout.getChildCount(); i++) {

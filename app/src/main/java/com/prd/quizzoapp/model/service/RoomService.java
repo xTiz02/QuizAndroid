@@ -30,11 +30,13 @@ public class RoomService {
     private UserService us;
     private DatabaseReference dbRef;
     private QuizServerImpl quizServer;
+    private ResultService rs;
 
     public RoomService(Context context) {
         auth = FirebaseAuth.getInstance();
         this.context = context;
         us = new UserService(context);
+        rs = new ResultService(context);
         quizServer = new QuizServerImpl();
         dbRef = FirebaseDatabase.getInstance().getReference("rooms");
     }
@@ -137,13 +139,26 @@ public class RoomService {
                     quizServer.deleteRoomSse(roomUUID, new ActionCallback() {
                         @Override
                         public void onSuccess() {
-                            DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
-                            DataSharedPreference.removeData(Util.IS_ADMIN_KEY, context);
-                            callback.onSuccess();
-                        }
+                            rs.deleteResult(roomUUID, new ActionCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    SseManager.getInstance().disconnect();
+                                    DataSharedPreference.clearData(context);
+                                    callback.onSuccess();
+                                }
 
+                                @Override
+                                public void onFailure(Exception e) {
+                                    SseManager.getInstance().disconnect();
+                                    DataSharedPreference.clearData(context);
+                                    Util.showLog(TAG, "Error al eliminar resultados");
+                                    callback.onFailure(e);
+                                }
+                            });
+                        }
                         @Override
                         public void onFailure(Exception e) {
+                            Util.showLog(TAG, "Error al eliminar sala");
                             callback.onFailure(e);
                         }
                     });
@@ -155,8 +170,7 @@ public class RoomService {
             dbRef.child(roomUUID).child("usersRoom").child(userUuid).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
                     SseManager.getInstance().disconnect();
-                    DataSharedPreference.removeData(Util.ROOM_UUID_KEY, context);
-                    DataSharedPreference.removeData(Util.IS_ADMIN_KEY, context);
+                    DataSharedPreference.clearData(context);
                     callback.onSuccess();
                 }else {
                     callback.onFailure(task.getException());

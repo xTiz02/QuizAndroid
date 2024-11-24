@@ -18,6 +18,7 @@ public class Util {
     public static final String ROOM_UUID_KEY = "roomUUID";
     public static final String IS_ADMIN_KEY = "isAdmin";
     public static final String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+    //DatabaseReference singleton
     //192.168.232.2 (port 41324)
 
     public static void showToastLog(String message,Context context){

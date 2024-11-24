@@ -28,6 +28,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserViewHolder> {
 
     public void setUsers(ArrayList<UserRoom> userRooms) {
         this.userRooms = userRooms;
+        notifyDataSetChanged();
+    }
+
+    public void clearUsers() {
+        userRooms.clear();
+        notifyDataSetChanged();
     }
 
     @NonNull

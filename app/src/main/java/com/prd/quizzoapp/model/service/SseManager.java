@@ -37,7 +37,7 @@ public class SseManager {
 
     private SseManager() {
         client = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
+                .connectTimeout(4, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.MINUTES)
                 .writeTimeout(20, TimeUnit.MINUTES)
                 .build();
@@ -69,7 +69,7 @@ public class SseManager {
 
             @Override
             public void onFailure(EventSource eventSource, Throwable t, okhttp3.Response response) {
-                Util.showLog("SseManager", "Error general en la conexión: " + t.getMessage());
+                Util.showLog("SseManager", "Error general en la conexión: " + t);
                 if (t != null) {
                     t.printStackTrace();
                 }

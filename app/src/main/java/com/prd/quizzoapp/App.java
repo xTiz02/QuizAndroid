@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.prd.quizzoapp.model.service.RoomService;
@@ -12,7 +13,6 @@ import com.prd.quizzoapp.util.Util;
 
 public class App extends Application {
     private RoomService roomService;
-    private FirebaseAuth auth;
     private int activityReferences = 0;
     private boolean isActivityChangingConfigurations = false;
 
@@ -20,12 +20,21 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         roomService = new RoomService(this);
-        auth = FirebaseAuth.getInstance();
-        if(auth.getUid() !=null){
+
+        //si el usuario ya ha iniciado sesion redirigir a la pantalla principal
+        // Verificar si el usuario está autenticado
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            Util.showLog("App", "No hay usuario autenticado");
+            Toast.makeText(this, "No hay usuario autenticado", Toast.LENGTH_SHORT).show();
+        } else {
+            Util.showLog("App", "Usuario autenticado");
+            // Si hay un usuario autenticado, redirigir a la pantalla principal
+            Toast.makeText(this, "Bienvenido " , Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
+
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -67,6 +76,7 @@ public class App extends Application {
             public void onActivityDestroyed(Activity activity) {}
 
             private void changeUserRoomState(boolean isPlaying) {
+                FirebaseAuth auth = FirebaseAuth.getInstance();
                 if(auth.getCurrentUser() != null && DataSharedPreference.getData(Util.ROOM_UUID_KEY,getApplicationContext()) != null){
                     roomService.changePlayingState(DataSharedPreference.getData(Util.ROOM_UUID_KEY,getApplicationContext()),auth.getUid().toString(),isPlaying);
                 }

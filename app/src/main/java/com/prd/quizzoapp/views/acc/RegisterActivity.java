@@ -61,7 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
         binding.tvLoginPage.setOnClickListener(v -> {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
-            finish();
         });
 
         binding.profilerg0.setOnClickListener(v->{
