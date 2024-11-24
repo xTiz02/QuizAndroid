@@ -80,7 +80,7 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp"
         android:fontFamily="@font/roboto_bold"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="0.1"
         android:layout_gravity="end|center"
         android:id="@+id/btnResults"/>

@@ -8,7 +8,7 @@ public class UserMessage {
     public UserMessage() {
     }
 
-    public UserMessage(String message, long timeStamp, String senderId) {
+    public UserMessage(String message,  String senderId,long timeStamp) {
         this.message = message;
         this.timeStamp = timeStamp;
         this.senderId = senderId;

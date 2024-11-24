@@ -91,7 +91,6 @@ public class RoomFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ls = new LoadingService(getContext());
         binding.rvUsers.setHasFixedSize(true);
         binding.rvUsers.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvUsers.setAdapter(userAdapter);
@@ -318,6 +317,7 @@ public class RoomFragment extends Fragment {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     UserRoom userRoom = snapshot.getValue(UserRoom.class);
+                    Util.getImages().put(userRoom.getUUID(), userRoom.getImg());
                     userAdapter.addUser(userRoom);
                 }
 
@@ -354,6 +354,7 @@ public class RoomFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         qs = new QuizServerImpl();
         rS = new RoomService(getContext());
+        ls = new LoadingService(getContext());
         resultService = new ResultService(getContext());
         userAdapter = new UserAdapter(new ArrayList<>(), getContext());
     }

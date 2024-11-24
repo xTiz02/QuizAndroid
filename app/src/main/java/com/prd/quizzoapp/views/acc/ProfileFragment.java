@@ -23,6 +23,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.prd.quizzoapp.databinding.FragmentProfileBinding;
 import com.prd.quizzoapp.model.entity.User;
+import com.prd.quizzoapp.model.service.LoadingService;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 import com.squareup.picasso.Picasso;
@@ -40,8 +41,16 @@ public class ProfileFragment extends Fragment {
     private User user;
     private Uri setImageUri;
     private ValueEventListener eventListener;
+    private LoadingService loadingService;
     public ProfileFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onDestroy() {//4
+        super.onDestroy();
+        Util.showLog("ProfileFragment", "onDestroy");
+        removeListener();
     }
 
     @Override
@@ -86,6 +95,7 @@ public class ProfileFragment extends Fragment {
                     Toast.makeText(getContext(), "No hay cambios", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                loadingService.showLoading("Guardando...");
                 if(setImageUri!=null){
                     StorageReference storageReference = storage.getReference().child("upload").child(auth.getUid().toString());
                     storageReference.putFile(setImageUri).addOnCompleteListener(task -> {
@@ -93,25 +103,29 @@ public class ProfileFragment extends Fragment {
                             storageReference.getDownloadUrl().addOnSuccessListener(uri -> {
                                 String finalImageUri = uri.toString();
                                 map.put("img", finalImageUri);
-                                dbRef.child(auth.getUid()).updateChildren(map).addOnCompleteListener(task1 -> {
+                                dbRef.updateChildren(map).addOnCompleteListener(task1 -> {
                                     if(task1.isSuccessful()){
                                         Toast.makeText(getContext(), "Usuario actualizado", Toast.LENGTH_SHORT).show();
                                     }else {
+                                        loadingService.hideLoading();
                                         Util.showLog("ProfileFragment", "Error al guardar usuario");
                                         Toast.makeText(getContext(), "Error al guardar usuario", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             });
                         }else {
+                            loadingService.hideLoading();
                             Util.showLog("ProfileFragment", "Error al subir imagen");
                             Toast.makeText(getContext(), "Error al subir imagen", Toast.LENGTH_SHORT).show();
                         }
                     });
+
                 }else {
-                    dbRef.child(auth.getUid()).updateChildren(map).addOnCompleteListener(task -> {
+                    dbRef.updateChildren(map).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(getContext(), "Usuario actualizado", Toast.LENGTH_SHORT).show();
                         } else {
+                            loadingService.hideLoading();
                             Util.showLog("ProfileFragment", "Error al guardar usuario");
                             Toast.makeText(getContext(), "Error al guardar usuario", Toast.LENGTH_SHORT).show();
                         }
@@ -123,11 +137,15 @@ public class ProfileFragment extends Fragment {
                             .child("usersRoom").child(auth.getUid())
                             .updateChildren(map).addOnCompleteListener(task -> {
                         if(task.isSuccessful()){
+                            loadingService.hideLoading();
                             Util.showLog("ProfileFragment", "Usuario actualizado en la sala");
                         }else {
+                            loadingService.hideLoading();
                             Util.showLog("ProfileFragment", "Error al actualizar usuario en la sala");
                         }
                     });
+                }else {
+                    loadingService.hideLoading();
                 }
             }
 
@@ -168,19 +186,13 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {//3s
+    public void onDestroyView() {//3s cuando se cambia de fragmento
         super.onDestroyView();
-        /*removeListener();
-        binding = null;*/
+        removeListener();
         Util.showLog("ProfileFragment", "onDestroyView");
     }
 
-   /* @Override
-    public void onStop() {//2s
-        super.onStop();
-        removeListener();
-        Util.showLog("ProfileFragment", "onStop");
-    }*/
+
 
     @Override
     public void onResume() {//se llama cuando el fragmento se vuelve visible para el usuario 4
@@ -193,9 +205,9 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {//1s
+    public void onPause() {//1s cunado se abre una subpantalla por encima
         super.onPause();
-        removeListener();
+        //removeListener();
         Util.showLog("ProfileFragment", "onPause");
     }
 
@@ -231,6 +243,7 @@ public class ProfileFragment extends Fragment {
     public void initServices() {
         storage = FirebaseStorage.getInstance();
         auth = FirebaseAuth.getInstance();
+        loadingService = new LoadingService(requireContext());
     }
 
     public void removeListener() {

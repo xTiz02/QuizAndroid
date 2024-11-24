@@ -10,7 +10,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.prd.quizzoapp.model.service.LoadingService;
 
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Util {
     private static Gson gson;
@@ -18,6 +20,20 @@ public class Util {
     public static final String ROOM_UUID_KEY = "roomUUID";
     public static final String IS_ADMIN_KEY = "isAdmin";
     public static final String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+
+    private static final Map<String, String> usersImg = new ConcurrentHashMap<>();
+
+    private Util() {} // Constructor privado para evitar instancias
+
+    public static Map<String, String> getImages() {
+        return usersImg;
+    }
+
+
+
+
+
+
     //DatabaseReference singleton
     //192.168.232.2 (port 41324)
 

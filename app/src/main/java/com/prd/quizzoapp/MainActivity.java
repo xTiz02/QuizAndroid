@@ -116,9 +116,20 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     @Override
     public void onMessageReceived(QuestionsListDto questions) {
         //esperar 4 segundos para que el usuario pueda leer el mensaje
-        Util.delay("La partida va a comenzar ...",this,
+        /*Util.delay("La partida va a comenzar ...",this,
                 ()->{
                     gameStart = true;
+                    Util.showLog(TAG, "La partida va a comenzar ...");
+                    Intent intent = new Intent(MainActivity.this, QuizActivity.class);
+                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
+                    startActivity(intent);
+                    finishAffinity();
+                });*/
+        Util.delay(4000, "La partida va a comenzar ...", this,
+                () -> {
+                    gameStart = true;
+                },
+                () -> {
                     Util.showLog(TAG, "La partida va a comenzar ...");
                     Intent intent = new Intent(MainActivity.this, QuizActivity.class);
                     intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
@@ -211,9 +222,10 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if(snapshot.exists()){
+                        String img = snapshot.child("img").getValue().toString();
                         Util.showLog(TAG, "Usuario obtenido 2");
                         binding.tvUserName.setText(snapshot.child("username").getValue().toString());
-                        Picasso.get().load(snapshot.child("img").getValue().toString()).into(binding.mainProfileImage);
+                        Picasso.get().load(img).into(binding.mainProfileImage);
                     }else {
                         binding.tvUserName.setText("loading...");
                     }

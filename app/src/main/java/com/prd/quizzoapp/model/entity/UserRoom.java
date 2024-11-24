@@ -9,7 +9,7 @@ public class UserRoom {
     private boolean isAdmin;
 
     public UserRoom(String uuid, String username, String description, String img, boolean playing, boolean isAdmin) {
-        UUID = uuid;
+        this.UUID = uuid;
         this.username = username;
         this.playing = playing;
         this.description = description;

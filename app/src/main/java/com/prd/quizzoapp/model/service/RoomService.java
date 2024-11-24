@@ -136,6 +136,9 @@ public class RoomService {
         if(isAdmin){
             dbRef.child(roomUUID).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
+                    String img = Util.getImages().get(userUuid);
+                    Util.getImages().clear();
+                    Util.getImages().put(userUuid, img);
                     quizServer.deleteRoomSse(roomUUID, new ActionCallback() {
                         @Override
                         public void onSuccess() {
@@ -169,6 +172,9 @@ public class RoomService {
         }else {
             dbRef.child(roomUUID).child("usersRoom").child(userUuid).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
+                    String img = Util.getImages().get(userUuid);
+                    Util.getImages().clear();
+                    Util.getImages().put(userUuid, img);
                     SseManager.getInstance().disconnect();
                     DataSharedPreference.clearData(context);
                     callback.onSuccess();
