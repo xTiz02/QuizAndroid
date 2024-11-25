@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.prd.quizzoapp.R;
 import com.prd.quizzoapp.databinding.ChatViewBinding;
 import com.prd.quizzoapp.model.entity.UserMessage;
 import com.prd.quizzoapp.model.service.ChatService;
@@ -42,7 +43,6 @@ public class BottomChatView extends BottomSheetDialogFragment {
 
     public BottomChatView() {
     }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +55,6 @@ public class BottomChatView extends BottomSheetDialogFragment {
         binding = ChatViewBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -65,12 +64,11 @@ public class BottomChatView extends BottomSheetDialogFragment {
         dialog.setOnShowListener(dialogInterface -> {
             BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) dialogInterface;
             FrameLayout bottomSheet = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
-
             if (bottomSheet != null) {
                 bottomSheet.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT; // Para ocupar toda la pantalla
                 BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(bottomSheet);
 
-                behavior.setPeekHeight((int) (getResources().getDisplayMetrics().heightPixels * 0.875)); // 87.5% de la pantalla
+                behavior.setPeekHeight((int) (getResources().getDisplayMetrics().heightPixels * 0.2)); // 87.5% de la pantalla
 
                 behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
                     @Override

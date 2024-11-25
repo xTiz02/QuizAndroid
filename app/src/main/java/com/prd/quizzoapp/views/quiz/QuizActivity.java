@@ -90,8 +90,8 @@ public class QuizActivity extends AppCompatActivity {
             }
             @Override
             public void onFinish() {
-                setOptions();
                 startTimer();
+                setOptions();
             }
         }.start();
         /*binding.btnNext.setOnClickListener(v -> onNext());
@@ -176,39 +176,43 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     private void startTimer() {
-        binding.circularProgressBar.setMax(20);
-        binding.circularProgressBar.setProgress(20);
+        binding.circularProgressBar.setMax(rc.getTimeOfQuestion());
+        binding.circularProgressBar.setProgress(rc.getTimeOfQuestion());
 
         timer = new CountDownTimer(rc.getTimeOfQuestion()* 1000L, 1000) {//el primer valor es el tiempo total y el segundo es el intervalo de tiempo en milisegundos
             @Override
             public void onTick(long millisUntilFinished) {
+                Util.showLog("QuizActivity", "Tiempo restante: " + millisUntilFinished / 1000);
                 binding.circularProgressBar.incrementProgressBy(-1);
                 binding.tvTimer.setText(String.valueOf(millisUntilFinished / 1000));
                 timeLeft = (double) (millisUntilFinished / 1000);
             }
             @Override
             public void onFinish() {
+                Util.showLog("QuizActivity", "Se termino termino cancelo el tiempo");
                 allowPlaying = false;
                 for (int i = 0; i < binding.linearLayout.getChildCount(); i++) {
                     AppCompatButton button = (AppCompatButton) binding.linearLayout.getChildAt(i);
+                    button.setEnabled(false);
                     if ((boolean) button.getTag()) {
                         button.setBackground(ContextCompat.getDrawable(button.getContext(), R.drawable.green_cricle));
                         break;
                     }
-                    button.setEnabled(false);
                 }
                 Toast.makeText(QuizActivity.this, "Se acabó el tiempo", Toast.LENGTH_SHORT).show();
                 marketCorrect = false;
                 setScore(false);
-                new CountDownTimer(4000, 1000) {
+                /*new CountDownTimer(4000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                     }
                     @Override
                     public void onFinish() {
+                        Util.showLog("QuizActivity", "Des de 4 se va a la siguiente pregunta");
                         onNext();
                     }
-                }.start();
+                }.start();*/
+                onNext();
             }
         }.start();
     }
