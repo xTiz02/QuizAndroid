@@ -48,6 +48,7 @@ public class SseManager {
             Util.showLog("SseManager", "Ya esta conectado");
             return; // Ya conectado
         }
+        Util.showLog("SseManager", "Conectando por primera vez");
 
         Request request = new Request.Builder()
                 .url("https://quizback-590131019426.us-central1.run.app/sse/" + roomUUID + "/stream")

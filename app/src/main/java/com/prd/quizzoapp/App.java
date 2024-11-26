@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.prd.quizzoapp.model.service.RoomService;
+import com.prd.quizzoapp.model.service.SseManager;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
 
@@ -78,6 +79,7 @@ public class App extends Application {
             private void changeUserRoomState(boolean isPlaying) {
                 FirebaseAuth auth = FirebaseAuth.getInstance();
                 if(auth.getCurrentUser() != null && DataSharedPreference.getData(Util.ROOM_UUID_KEY,getApplicationContext()) != null){
+                    SseManager.getInstance().disconnect();
                     roomService.changePlayingState(DataSharedPreference.getData(Util.ROOM_UUID_KEY,getApplicationContext()),auth.getUid().toString(),isPlaying);
                 }
             }

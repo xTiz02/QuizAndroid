@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         Util.delay(4000, "La partida va a comenzar ...", this,
                 () -> {
                     gameStart = true;
+                    //roomService.changePlayingState(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),idUser, true);
                 },
                 () -> {
                     Util.showLog(TAG, "La partida va a comenzar ...");
@@ -141,11 +142,13 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
     public void onConnectionError(Throwable t) {
         //DataSharedPreference.removeData(Util.ROOM_UUID_KEY, this);
         if (!logout && !gameStart) {
-            Util.delay(2000, "Error al conectar con la sala", this,
+            Util.delay(2000, "Intentando volver a la sala", this,
                     () -> {//before
                     },
                     () -> {
-
+                        if(DataSharedPreference.containsData(Util.ROOM_UUID_KEY, this)){
+                            roomService.changePlayingState(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),idUser, true);
+                        }
                         NavController navController = Navigation.findNavController(this, R.id.fragmentContainerView);
                         navController.navigate(R.id.homeFragment);
                         Util.showLog(TAG, "Error en la conexión escuchando en main");
