@@ -26,6 +26,20 @@ public class LoadingService {
         tv.setText(message);
     }
 
+    //mostrar un mensaje de 5 segundos
+    public void showLoading(String message, int time) {
+        alertDialog = new AlertDialog.Builder(context)
+                .setView(R.layout.progress_bar)
+                .setCancelable(false)
+                .create();
+        alertDialog.show();
+        TextView tv =  alertDialog.findViewById(R.id.tv_loading);
+        tv.setText(message);
+        new android.os.Handler().postDelayed(
+                () -> alertDialog.dismiss(),
+                time);
+    }
+
     public void updateMessage(String message) {
         TextView tv =  alertDialog.findViewById(R.id.tv_loading);
         tv.setText(message);

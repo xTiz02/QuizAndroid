@@ -24,9 +24,11 @@
             android:theme="@style/Theme.QuizzoApp" />
         <activity
             android:name=".views.acc.RegisterActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".views.acc.LoginActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

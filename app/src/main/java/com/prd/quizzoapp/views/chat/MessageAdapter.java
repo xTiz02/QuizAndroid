@@ -31,11 +31,11 @@ public class MessageAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {//2
         if (viewType == ITEM_SEND){
-            View view = LayoutInflater.from(context).inflate(R.layout.sender_layout, parent, false);
-            return new SenderViewHolder(view);
-        }else {
             View view = LayoutInflater.from(context).inflate(R.layout.reciver_layout, parent, false);
             return new ReciveViewHolder(view);
+        }else {
+            View view = LayoutInflater.from(context).inflate(R.layout.sender_layout, parent, false);
+            return new SenderViewHolder(view);
         }
     }
 

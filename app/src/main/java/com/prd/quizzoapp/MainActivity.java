@@ -2,6 +2,7 @@ package com.prd.quizzoapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Toast;
 
@@ -107,11 +108,6 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                  }
              });
          });*/
-
-
-
-
-
     }
     @Override
     public void onMessageReceived(QuestionsListDto questions) {
@@ -125,17 +121,27 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                     startActivity(intent);
                     finishAffinity();
                 });*/
-        Util.delay(4000, "La partida va a comenzar ...", this,
+        Util.delay(this,
                 () -> {
-                    gameStart = true;
-                    //roomService.changePlayingState(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),idUser, true);
-                },
-                () -> {
-                    Util.showLog(TAG, "La partida va a comenzar ...");
-                    Intent intent = new Intent(MainActivity.this, QuizActivity.class);
-                    intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
-                    startActivity(intent);
-                    finishAffinity();
+                    LoadingService loadingService = new LoadingService(MainActivity.this);
+                    loadingService.showLoading("La partida va a comenzar en: ");
+                    new CountDownTimer(4000, 1000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            loadingService.updateMessage("La partida va a comenzar en: " + millisUntilFinished / 1000 + " segundos");
+                            Util.showLog(TAG, "La partida va a comenzar en " + millisUntilFinished / 1000 + " segundos");
+                        }
+                        @Override
+                        public void onFinish() {
+                            gameStart = true;
+                            Util.showLog(TAG, "La partida va a comenzar ...");
+                            loadingService.hideLoading();
+                            Intent intent = new Intent(MainActivity.this, QuizActivity.class);
+                            intent.putExtra("questions", new ArrayList<>(questions.getQuestions()));
+                            startActivity(intent);
+                            finish();
+                        }
+                    }.start();
                 });
     }
     @Override

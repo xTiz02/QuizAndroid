@@ -70,9 +70,7 @@ public class Util {
         new Handler(Looper.getMainLooper()).post(() -> {
             LoadingService loadingService = new LoadingService(context);
             loadingService.showLoading(message);
-
             beforeDelay.run();
-
             new Handler().postDelayed(() -> {
                 afterDelay.run();
                 loadingService.hideLoading();
@@ -84,10 +82,14 @@ public class Util {
         new Handler(Looper.getMainLooper()).post(() -> {
             LoadingService loadingService = new LoadingService(context);
             loadingService.showLoading(message);
-
             run.run();
-
             loadingService.hideLoading();
+        });
+    }
+
+    public static void delay(Context context,Runnable run){
+        new Handler(Looper.getMainLooper()).post(() -> {
+            run.run();
         });
     }
 

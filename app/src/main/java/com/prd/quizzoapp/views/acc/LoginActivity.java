@@ -52,10 +52,11 @@ public class LoginActivity extends AppCompatActivity {
                     new ActionCallback() {
                         @Override
                         public void onSuccess() {
+                            ls.hideLoading();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
-                            ls.hideLoading();
+
                         }
 
                         @Override
