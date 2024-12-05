@@ -41,11 +41,11 @@ public class RoomService {
         dbRef = FirebaseDatabase.getInstance().getReference("rooms");
     }
 
-    public void createRoom(String roomCode,  int questions, int time,
+    public void createRoom(int max,String roomCode,  int questions, int time,
                            ArrayList<Category> categories, ArrayList<String> subCategories, ActionCallback callback) {
         String roomUUID = dbRef.push().getKey();
         String userUUID = auth.getUid().toString();
-        Room room = new Room(new RoomConfig(roomUUID,userUUID,time,questions,roomCode),subCategories,categories);
+        Room room = new Room(new RoomConfig(roomUUID,userUUID,time,questions,roomCode,max,1),subCategories,categories);
         dbRef.child(roomUUID).child("settings").setValue(room).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 us.saveUserRoom(roomUUID, userUUID, true, new ActionCallback() {
@@ -83,7 +83,7 @@ public class RoomService {
         });
     }
 
-    public void updateRoom(String roomUuid,Map<String,Object> data, ActionCallback callback){
+    public void updateRoomSettings(String roomUuid, Map<String,Object> data, ActionCallback callback){
         dbRef.child(roomUuid).child("settings").updateChildren(data).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 callback.onSuccess();
@@ -104,12 +104,29 @@ public class RoomService {
                 if(snapshot.exists()){
                     for(DataSnapshot ds: snapshot.getChildren()){
                         RoomConfig roomConfig = ds.child("settings/roomConfig").getValue(RoomConfig.class);
+                        int currentPlayers = roomConfig.getCurrentPlayers() +1;
+                        if(currentPlayers > roomConfig.getMaxPlayers()){
+                            Util.showLog(TAG, "La sala esta llena");
+                            callback.onFailure(new Exception("Sala llena"));
+                            return;
+                        }
                         DataSharedPreference.saveData(Util.ROOM_UUID_KEY, roomConfig.getUuid(), context);
-                        us.saveUserRoom(roomConfig.getUuid(), auth.getUid(), false, new ActionCallback() {
+                        updateRoomSettings(roomConfig.getUuid(), Map.of("/roomConfig/currentPlayers", currentPlayers), new ActionCallback() {
                             @Override
                             public void onSuccess() {
-                                DataSharedPreference.saveBooleanData(Util.IS_ADMIN_KEY , false, context);
-                                callback.onSuccess(roomConfig);
+                                Util.showLog(TAG, "Se actualizo el numero de jugadores");
+                                us.saveUserRoom(roomConfig.getUuid(), auth.getUid(), false, new ActionCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        DataSharedPreference.saveBooleanData(Util.IS_ADMIN_KEY , false, context);
+                                        callback.onSuccess(roomConfig);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        callback.onFailure(e);
+                                    }
+                                });
                             }
 
                             @Override
@@ -172,12 +189,33 @@ public class RoomService {
         }else {
             dbRef.child(roomUUID).child("usersRoom").child(userUuid).removeValue().addOnCompleteListener(task -> {
                 if(task.isSuccessful()){
-                    String img = Util.getImages().get(userUuid);
-                    Util.getImages().clear();
-                    Util.getImages().put(userUuid, img);
-                    SseManager.getInstance().disconnect();
-                    DataSharedPreference.clearData(context);
-                    callback.onSuccess();
+                    getRoomByUuid(roomUUID, new DataActionCallback<Room>() {
+                        @Override
+                        public void onSuccess(Room room) {
+                            int currentPlayers = room.getRoomConfig().getCurrentPlayers() -1;
+                            updateRoomSettings(roomUUID, Map.of("/roomConfig/currentPlayers", currentPlayers), new ActionCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    String img = Util.getImages().get(userUuid);
+                                    Util.getImages().clear();
+                                    Util.getImages().put(userUuid, img);
+                                    SseManager.getInstance().disconnect();
+                                    DataSharedPreference.clearData(context);
+                                    callback.onSuccess();
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    callback.onFailure(e);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            callback.onFailure(e);
+                        }
+                    });
                 }else {
                     callback.onFailure(task.getException());
                 }

@@ -6,17 +6,22 @@ public class RoomConfig {
     private int questions;
     private int timeOfQuestion;
     private String uuidAdmin;
+    private int maxPlayers;
+    private int currentPlayers;
 
     public RoomConfig() {
     }
 
-    public RoomConfig(String uuid, String uuidAdmin, int timeOfQuestion, int questions, String code) {
+    public RoomConfig(String uuid, String uuidAdmin, int timeOfQuestion, int questions, String code, int maxPlayers, int currentPlayers) {
         this.uuid = uuid;
         this.uuidAdmin = uuidAdmin;
         this.timeOfQuestion = timeOfQuestion;
         this.questions = questions;
         this.code = code;
+        this.maxPlayers = maxPlayers;
+        this.currentPlayers = currentPlayers;
     }
+
 
     public String getUuid() {
         return uuid;
@@ -40,6 +45,22 @@ public class RoomConfig {
 
     public void setTimeOfQuestion(int timeOfQuestion) {
         this.timeOfQuestion = timeOfQuestion;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    public int getCurrentPlayers() {
+        return currentPlayers;
+    }
+
+    public void setCurrentPlayers(int currentPlayers) {
+        this.currentPlayers = currentPlayers;
     }
 
     public int getQuestions() {
@@ -66,6 +87,8 @@ public class RoomConfig {
                 ", questions=" + questions +
                 ", timeOfQuestion=" + timeOfQuestion +
                 ", uuidAdmin='" + uuidAdmin + '\'' +
+                ", maxPlayers=" + maxPlayers +
+                ", currentPlayers=" + currentPlayers +
                 '}';
     }
 }

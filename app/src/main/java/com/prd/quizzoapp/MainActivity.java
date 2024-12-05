@@ -31,6 +31,7 @@ import com.prd.quizzoapp.model.service.UserService;
 import com.prd.quizzoapp.model.service.intf.ActionCallback;
 import com.prd.quizzoapp.util.DataSharedPreference;
 import com.prd.quizzoapp.util.Util;
+import com.prd.quizzoapp.views.acc.LoginActivity;
 import com.prd.quizzoapp.views.quiz.QuizActivity;
 import com.squareup.picasso.Picasso;
 
@@ -60,11 +61,10 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initServices();
-        /*binding.ivLogout.setOnClickListener(v -> {
+        binding.ivLogout.setOnClickListener(v -> {
              loadingService.signOutDialog(()->{
                  logout = true;
-                 dbRef.removeEventListener(valueUserListener);
-                Util.showLog(TAG, "Saliendo de la app");
+                 Util.showLog(TAG, "Saliendo de la app");
                  if(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this) != null) {
                      boolean isAdmin = DataSharedPreference.getBooleanData(Util.IS_ADMIN_KEY, this);
                      roomService.deleteRoom(DataSharedPreference.getData(Util.ROOM_UUID_KEY, this),
@@ -73,13 +73,13 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                              new ActionCallback() {
                                  @Override
                                  public void onSuccess() {
-
                                      Util.showLog(TAG, "Sala eliminada");
-                                     logout = true;
-
                                      DataSharedPreference.removeData(Util.ROOM_UUID_KEY, MainActivity.this);
                                      DataSharedPreference.removeData(Util.IS_ADMIN_KEY, MainActivity.this);
-
+                                     FirebaseAuth.getInstance().signOut();
+                                     Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                                     startActivity(intent);
+                                     finish();
                                  }
 
                                  @Override
@@ -88,26 +88,15 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                                  }
                              });
                  }else {
+                    Util.showLog(TAG, "Saliendo de la app sin la sala");
+                    FirebaseAuth.getInstance().signOut();
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
 
-                     Util.showLog(TAG, "Saliendo de la app sin la sala");
-                     logout = true;
-
-                    //cerrar todas las actividades y fragmentos
-                    //eliminar la navegación de la pila de retroceso
-                 }
-                 FirebaseAuth.getInstance().signOut();
-                 Util.showLog(TAG, "Redirigiendo a la pantalla de inicio de sesión");
-                 //cerrar la app
-                 NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                         .findFragmentById(R.id.fragmentContainerView);
-                 if (navHostFragment != null) {
-                     NavController navController = navHostFragment.getNavController();
-
-
-                     navController.popBackStack(R.id.main_graph, true); // Reemplaza 'nav_graph' con el ID de tu gráfico raíz
                  }
              });
-         });*/
+         });
     }
     @Override
     public void onMessageReceived(QuestionsListDto questions) {
@@ -285,6 +274,12 @@ public class MainActivity extends AppCompatActivity implements SseManager.SseLis
                     navController.navigate(item.getItemId());
                 }
             }else {
+                if(item.getItemId() == R.id.profileFragment){
+                    //ocultar el boton de salida
+                    binding.ivLogout.setVisibility(View.GONE);
+                }else {
+                    binding.ivLogout.setVisibility(View.VISIBLE);
+                }
                 navController.navigate(item.getItemId());
             }
             return true;

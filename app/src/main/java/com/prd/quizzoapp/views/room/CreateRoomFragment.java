@@ -232,10 +232,16 @@ public class CreateRoomFragment extends Fragment {
             Toast.makeText(getContext(), "Selecciona un tiempo", Toast.LENGTH_SHORT).show();
             return;
         }
+        if(binding.edtMaxPlayers.getText().toString().isEmpty()){
+            binding.edtMaxPlayers.requestFocus();
+            Toast.makeText(getContext(), "Ingresa la cantidad de jugadores", Toast.LENGTH_SHORT).show();
+            return;
+        }
         ls.showLoading("Creando sala...");
         Chip selectedChip = binding.chipGroupQuestions.findViewById(binding.chipGroupQuestions.getCheckedChipId());
         Chip selectedChipTime = binding.chipGroupTime.findViewById(binding.chipGroupTime.getCheckedChipId());
         roomService.createRoom(
+                Integer.parseInt(binding.edtMaxPlayers.getText().toString()),
                 code,
                 Integer.parseInt(selectedChip.getText().toString()),
                 Integer.parseInt(selectedChipTime.getText().toString()),
@@ -280,6 +286,11 @@ public class CreateRoomFragment extends Fragment {
             Toast.makeText(getContext(), "Selecciona un tiempo", Toast.LENGTH_SHORT).show();
             return;
         }
+        if(binding.edtMaxPlayers.getText().toString().isEmpty()){
+            binding.edtMaxPlayers.requestFocus();
+            Toast.makeText(getContext(), "Ingresa la cantidad de jugadores", Toast.LENGTH_SHORT).show();
+            return;
+        }
         ls.showLoading("Actualizando sala...");
         Map<String, Object> newRoom = new HashMap<>();
         Set<String> subCategoriesSet = selectedSubCategories.stream()
@@ -304,13 +315,20 @@ public class CreateRoomFragment extends Fragment {
         if(!code.equals(currentRoom.getRoomConfig().getCode())) {
             newRoom.put("/roomConfig/code", code);
         }
+        if(String.valueOf(currentRoom.getRoomConfig().getMaxPlayers()) != binding.edtMaxPlayers.getText().toString()){
+            if(Integer.parseInt(binding.edtMaxPlayers.getText().toString()) < currentRoom.getRoomConfig().getCurrentPlayers()){
+                Util.showToastLog("No puedes reducir la cantidad de jugadores", getContext());
+                return;
+            }
+            newRoom.put("/roomConfig/maxPlayers", Integer.parseInt(binding.edtMaxPlayers.getText().toString()));
+        }
         if(newRoom.isEmpty()){
             Util.showToastLog("No hay cambios", getContext());
             ls.hideLoading();
             return;
         }
 
-        roomService.updateRoom(
+        roomService.updateRoomSettings(
                 idRoom,
                 newRoom,
                 new ActionCallback() {

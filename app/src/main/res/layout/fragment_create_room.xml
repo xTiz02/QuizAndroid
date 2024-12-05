@@ -250,35 +250,30 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="3"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="5"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="10"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="15"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="20"/>
 
                 <!-- Add more Chip views for 15, 20, 25, 30, 35 -->
@@ -320,48 +315,58 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="8"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="10"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="15"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="20"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="25"/>
 
                 <com.google.android.material.chip.Chip
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="@color/chip_back"
                     android:text="30"/>
 
                 <!-- Add more Chip views for 9, 12, 15, 18, 21 -->
 
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
+
+        <!--Jugadores maximos-->
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/edtMaxPlayers"
+            android:hint="Maximo de jugadores"
+            android:inputType="number"
+            android:textColorHint="@color/light_gray_1"
+            android:textColor="@color/light_gray_1"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/scrollTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
 
 
         <androidx.appcompat.widget.AppCompatButton
@@ -377,7 +382,7 @@
             android:text="Crear sala"
             style="@style/Button_principal"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintTop_toBottomOf="@id/scrollTime"
+            app:layout_constraintTop_toBottomOf="@id/edtMaxPlayers"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
